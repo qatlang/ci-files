@@ -1,0 +1,18 @@
+name: Build LLVM
+
+on: workflow-dispatch
+
+jobs:
+  linux_x86_64:
+    name: x86_64-unknown-linux-gnu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update APT cache
+        run: sudo apt update
+      - name: Install ninja-build
+        run: sudo apt --yes install ninja-build
+      - name: Install clang & lld
+        run: sudo apt --yes clang-19 lld-19
+      - name: Display current working directory
+        run: pwd
