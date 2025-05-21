@@ -18,7 +18,7 @@ jobs:
       - name: Install ninja-build
         run: sudo apt --yes install ninja-build
       - name: Install clang & lld
-        run: sudo apt --yes clang-19 lld-19
+        run: sudo apt --yes install clang-19 lld-19
       - name: Display current working directory
         run: pwd
       - name: Create result directory
