@@ -1,6 +1,11 @@
 name: Build LLVM
 
-on: workflow-dispatch
+on: workflow_dispatch
+
+env:
+  LLVM_VERSION: 20.1.5
+  BOOST_VERSION: 1.86.0
+  BOOST_VERSION_NAME: 1_86_0
 
 jobs:
   linux_x86_64:
@@ -16,3 +21,23 @@ jobs:
         run: sudo apt --yes clang-19 lld-19
       - name: Display current working directory
         run: pwd
+      - name: Create result directory
+        run: mkdir result
+      - name: Download & extract boost
+        run: |
+          wget https://archives.boost.io/release/$BOOST_VERSION/source/boost_$BOOST_VERSION_NAME.tar.gz
+          tar -xvzf boost_$BOOST_VERSION_NAME.tar.gz
+          mv boost_$BOOST_VERSION_NAME boost
+          rm boost_$BOOST_VERSION_NAME.tar.gz
+      - name: Build boost
+        working-directory: boost
+        run: |
+          echo "clang : x64 : clang++-19 ;" >> ~/user-config.jam
+          ./bootstrap.sh
+          ./b2
+      - name: Download & extract LLVM source
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-$LLVM_VERSION/llvm-project-$LLVM_VERSION.src.tar.xz
+          tar -xf llvm-project-$LLVM_VERSION.src.tar.xz
+          mv llvm-project-$LLVM_VERSION.src llvm-project
+          rm llvm-project-$LLVM_VERSION.src.tar.xz
