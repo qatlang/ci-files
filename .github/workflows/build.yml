@@ -26,13 +26,13 @@ jobs:
       - name: Download & extract boost
         run: |
           wget https://archives.boost.io/release/$BOOST_VERSION/source/boost_$BOOST_VERSION_NAME.tar.gz
-          tar -xvzf boost_$BOOST_VERSION_NAME.tar.gz
+          tar -xzf boost_$BOOST_VERSION_NAME.tar.gz
           mv boost_$BOOST_VERSION_NAME boost
           rm boost_$BOOST_VERSION_NAME.tar.gz
       - name: Build boost
         working-directory: boost
         run: |
-          echo "clang : x64 : clang++-19 ;" >> ~/user-config.jam
+          echo "using clang : x64 : clang++-19 ;" >> ~/user-config.jam
           ./bootstrap.sh
           ./b2 toolset=clang-x64
       - name: Download & extract LLVM source
