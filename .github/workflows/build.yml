@@ -1,4 +1,4 @@
-name: Build LLVM
+name: Build qat dependencies
 
 on: workflow_dispatch
 
@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "clang : x64 : clang++-19 ;" >> ~/user-config.jam
           ./bootstrap.sh
-          ./b2
+          ./b2 toolset=clang-x64
       - name: Download & extract LLVM source
         run: |
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-$LLVM_VERSION/llvm-project-$LLVM_VERSION.src.tar.xz
