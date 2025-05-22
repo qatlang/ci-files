@@ -17,7 +17,7 @@ jobs:
       - name: Create release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create $(date +'%Y-%m-%d') --draft --notes "llvm = $LLVM_VERSION\nboost = $BOOST_VERSION\n" --title "llvm $LLVM_VERSION, boost $BOOST_VERSION"
+        run: gh release create $(date +'%Y-%m-%d') --draft --notes "llvm = $LLVM_VERSION, boost = $BOOST_VERSION" --title "llvm $LLVM_VERSION, boost $BOOST_VERSION"
 
   linux_x86_64:
     needs: [create_release]
@@ -40,6 +40,9 @@ jobs:
 
       - name: Install riscv64 toolchain
         run: sudo apt --yes install binutils-riscv64-linux-gnu cpp-14-riscv64-linux-gnu g++-14-riscv64-linux-gnu gcc-14-riscv64-linux-gnu gcc-riscv64-unknown-elf libc6-dev-riscv64-cross libc6-riscv64-cross libgcc-14-dev-riscv64-cross libstdc++6-riscv64-cross libstdc++-14-dev-riscv64-cross libstdc++-14-pic-riscv64-cross linux-libc-dev-riscv64-cross
+
+      - name: Install aarch64 toolchain
+        run: sudo apt --yes install binutils-aarch64-linux-gnu cpp-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu gcc-14-aarch64-linux-gnu libc6-dev-arm64-cross libc6-arm64-cross libgcc-14-dev-arm64-cross libstdc++6-arm64-cross libstdc++-14-dev-arm64-cross linux-libc-dev-arm64-cross
         
       - name: Create library directories
         run: |
@@ -82,7 +85,7 @@ jobs:
         working-directory: llvm-project/llvm
         run: |
           mkdir build
-          cmake -S . -B build/ -G"Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/libs/llvm" -DCMAKE_C_COMPILER="clang-$HOST_CLANG_VERSION" -DCMAKE_CXX_COMPILER="clang++-$HOST_CLANG_VERSION" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DLLVM_RUNTIME_TARGETS="aarch64-unknown-linux-gnu;i686-unknown-linux-gnu;powerpc-unknown-linux-gnu;powerpc64-unknown-linux-gnu;riscv64-unknown-linux-gnu;s390x-unknown-linux-gnu;x86_64-unknown-linux-gnu" -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_USE_LLD=ON -DLLVM_ENABLE_ZLIB=ON -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=ON -DZLIB_LIBRARY="/usr/lib/x86_64-linux-gnu/libz.a" -DLibEdit_INCLUDE_DIRS="/usr/include/editline" -DLibEdit_LIBRARIES="/usr/lib/x86_64-linux-gnu/libedit.a;/usr/lib/x86_64-linux-gnu/libtinfo.a" -DLibXml2_INCLUDE_DIRS="" -DLibXml2_LIBRARY="/usr/lib/x86_64-linux-gnu/libxml2.a"
+          cmake -S . -B build/ -G"Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/libs/llvm" -DCMAKE_C_COMPILER="clang-$HOST_CLANG_VERSION" -DCMAKE_CXX_COMPILER="clang++-$HOST_CLANG_VERSION" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DLLVM_RUNTIME_TARGETS="aarch64-unknown-linux-gnu;i686-unknown-linux-gnu;powerpc-unknown-linux-gnu;powerpc64-unknown-linux-gnu;riscv64-unknown-linux-gnu;s390x-unknown-linux-gnu;x86_64-unknown-linux-gnu"  -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_USE_LLD=ON -DLLVM_ENABLE_ZLIB=ON -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=ON -DZLIB_LIBRARY="/usr/lib/x86_64-linux-gnu/libz.a" -DLibEdit_INCLUDE_DIRS="/usr/include/editline" -DLibEdit_LIBRARIES="/usr/lib/x86_64-linux-gnu/libedit.a;/usr/lib/x86_64-linux-gnu/libtinfo.a" -DLibXml2_INCLUDE_DIRS="" -DLibXml2_LIBRARY="/usr/lib/x86_64-linux-gnu/libxml2.a"
           cmake --build build --target install
           cp -r ${{ github.workspace }}/libs/llvm/lib/clang/$(cut -d '.' -f 1 <<< $LLVM_VERSION)/lib/* ${{ github.workspace }}/linux-runtimes/
 
