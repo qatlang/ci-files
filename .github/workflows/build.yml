@@ -6,38 +6,96 @@ env:
   LLVM_VERSION: 20.1.5
   BOOST_VERSION: 1.86.0
   BOOST_VERSION_NAME: 1_86_0
+  HOST_CLANG_VERSION: 19
 
 jobs:
-  linux_x86_64:
-    name: x86_64-unknown-linux-gnu
+  create_release:
+    name: Create release & tag
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=today::$(date +'%Y-%m-%d')"
+      - name: Create release
+        env: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create ${{ steps.date.output.today }} --draft --notes "llvm: $LLVM_VERSION\nboost: $BOOST_VERSION\n" --title "llvm - $LLVM_VERSION, boost - $BOOST_VERSION"
+
+  linux_x86_64:
+    needs: [create_release]
+    name: x86_64-unknown-linux-gnu
+    runs-on: ubuntu-latest
+    env:
+      TARGET_TRIPLE: x86_64-unknown-linux-gnu
+    steps:
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=today::$(date +'%Y-%m-%d')"
+      
       - name: Update APT cache
         run: sudo apt update
-      - name: Install ninja-build
-        run: sudo apt --yes install ninja-build
-      - name: Install clang & lld
-        run: sudo apt --yes install clang-19 lld-19
-      - name: Display current working directory
-        run: pwd
-      - name: Create result directory
-        run: mkdir result
+        
+      - name: Install build tools
+        run: sudo apt --yes install ninja-build clang-19 lld-19
+
+      - name: Install GCC Multilib
+        run: sudo apt --yes install gcc-14-multilib-x86-64-linux-gnux32 gcc-14-multilib-s390x-linux-gnu gcc-14-multilib-powerpc64-linux-gnu gcc-14-multilib-powerpc-linux-gnu gcc-14-multilib-i686-linux-gnu
+
+      - name: Install GCC C++ Multilib
+        run: sudo apt --yes install g++-14-multilib-x86-64-linux-gnux32 g++-14-multilib-s390x-linux-gnu g++-14-multilib-powerpc64-linux-gnu g++-14-multilib-powerpc-linux-gnu g++-14-multilib-i686-linux-gnu
+
+      - name: Install riscv64 toolchain
+        run: sudo apt --yes install binutils-riscv64-linux-gnu cpp-14-riscv64-linux-gnu g++-14-riscv64-linux-gnu gcc-14-riscv64-linux-gnu gcc-riscv64-unknown-elf libc6-dev-riscv64-cross libc6-riscv64-cross libgcc-14-dev-riscv64-cross libstdc++6-riscv64-cross libstdc++-14-dev-riscv64-cross libstdc++-14-pic-riscv64-cross linux-libc-dev-riscv64-cross
+        
+      - name: Create library directories
+        run: |
+          mkdir libs
+          mkdir libs/llvm
+          mkdir libs/boost
+          mkdir libs/icu4c
+          mkdir libs/ncurses
+          mkdir linux-runtimes
+          
+      - name: Install dependencies
+        run: sudo apt --yes install zlib1g-dev libzstd-dev liblzma-dev libxml2-dev libedit-dev libbz2-dev libtinfo6 terminfo ncurses-bin libncurses-dev libicu-dev
+      - name: Check dependencies
+        run: |
+          dpkg -L zlib1g-dev
+          dpkg -L libzstd-dev
+          dpkg -L libedit-dev
+          dpkg -L libncurses-dev
+          dpkg -L libxml2-dev
+          dpkg -L libicu-dev
+        
       - name: Download & extract boost
         run: |
-          wget https://archives.boost.io/release/$BOOST_VERSION/source/boost_$BOOST_VERSION_NAME.tar.gz
+          wget -nv https://archives.boost.io/release/$BOOST_VERSION/source/boost_$BOOST_VERSION_NAME.tar.gz
           tar -xzf boost_$BOOST_VERSION_NAME.tar.gz
           mv boost_$BOOST_VERSION_NAME boost
-          rm boost_$BOOST_VERSION_NAME.tar.gz
       - name: Build boost
         working-directory: boost
         run: |
           echo "using clang : x64 : clang++-19 ;" >> ~/user-config.jam
-          ./bootstrap.sh
-          ./b2 toolset=clang-x64
+          ./bootstrap.sh --prefix="${{ github.workspace }}/libs/boost"
+          ./b2 toolset=clang-x64 install
+      
       - name: Download & extract LLVM source
         run: |
-          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-$LLVM_VERSION/llvm-project-$LLVM_VERSION.src.tar.xz
+          wget -nv https://github.com/llvm/llvm-project/releases/download/llvmorg-$LLVM_VERSION/llvm-project-$LLVM_VERSION.src.tar.xz
           tar -xf llvm-project-$LLVM_VERSION.src.tar.xz
           mv llvm-project-$LLVM_VERSION.src llvm-project
-          rm llvm-project-$LLVM_VERSION.src.tar.xz
+      - name: Build LLVM
+        working-directory: llvm-project/llvm
+        run: |
+          mkdir build
+          cmake -S . -B build/ -G"Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/libs/llvm" -DCMAKE_C_COMPILER="clang-$HOST_CLANG_VERSION" -DCMAKE_CXX_COMPILER="clang++-$HOST_CLANG_VERSION" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DLLVM_RUNTIME_TARGETS="aarch64-unknown-linux-gnu;i686-unknown-linux-gnu;powerpc-unknown-linux-gnu;powerpc64-unknown-linux-gnu;riscv64-unknown-linux-gnu;s390x-unknown-linux-gnu;x86_64-unknown-linux-gnu" -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_USE_LLD=ON -DLLVM_ENABLE_ZLIB=ON -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=ON -DZLIB_LIBRARY="/usr/lib/x86_64-linux-gnu/libz.a" -DLibEdit_INCLUDE_DIRS="/usr/include/editline" -DLibEdit_LIBRARIES="/usr/lib/x86_64-linux-gnu/libedit.a;/usr/lib/x86_64-linux-gnu/libtinfo.a" -DLibXml2_INCLUDE_DIRS="" -DLibXml2_LIBRARY="/usr/lib/x86_64-linux-gnu/libxml2.a"
+          cmake --build build --target install
+          cp -r ${{ github.workspace }}/libs/llvm/lib/clang/$(cut -d '.' -f 1 <<< $LLVM_VERSION)/lib/* ${{ github.workspace }}/linux-runtimes/
+
+      - name: Prepare runtimes
+        run: tar -cf linux-runtimes.tar.xz linux-runtimes
+      - name: Prepare libs
+        run: tar -cf linux-x64-libs.tar.xz libs
+        
+      - name: Upload results
+        env: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ steps.date.outputs.today }} linux-runtimes.tar.xz linux-x64.tar.gz
