@@ -17,7 +17,8 @@ jobs:
         id: date
         run: echo "::set-output name=today::$(date +'%Y-%m-%d')"
       - name: Create release
-        env: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create ${{ steps.date.output.today }} --draft --notes "llvm = $LLVM_VERSION\nboost = $BOOST_VERSION\n" --title "llvm $LLVM_VERSION, boost $BOOST_VERSION"
 
   linux_x86_64:
@@ -97,5 +98,6 @@ jobs:
         run: tar -cf linux-x64-libs.tar.xz libs
         
       - name: Upload results
-        env: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ steps.date.outputs.today }} linux-runtimes.tar.xz linux-x64.tar.gz
