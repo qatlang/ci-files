@@ -13,13 +13,10 @@ jobs:
     name: Create release & tag
     runs-on: ubuntu-latest
     steps:
-      - name: Get current date
-        id: date
-        run: echo "::set-output name=today::$(date +'%Y-%m-%d')"
       - name: Create release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create ${{ steps.date.output.today }} --draft --notes "llvm = $LLVM_VERSION\nboost = $BOOST_VERSION\n" --title "llvm $LLVM_VERSION, boost $BOOST_VERSION"
+        run: gh release create $(date +'%Y-%m-%d') --draft --notes "llvm = $LLVM_VERSION\nboost = $BOOST_VERSION\n" --title "llvm $LLVM_VERSION, boost $BOOST_VERSION"
 
   linux_x86_64:
     needs: [create_release]
@@ -100,4 +97,4 @@ jobs:
       - name: Upload results
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ steps.date.outputs.today }} linux-runtimes.tar.xz linux-x64.tar.gz
+        run: gh release upload $(date +'%Y-%m-%d') linux-runtimes.tar.xz linux-x64.tar.gz
