@@ -18,7 +18,7 @@ jobs:
         run: echo "::set-output name=today::$(date +'%Y-%m-%d')"
       - name: Create release
         env: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create ${{ steps.date.output.today }} --draft --notes "llvm: $LLVM_VERSION\nboost: $BOOST_VERSION\n" --title "llvm - $LLVM_VERSION, boost - $BOOST_VERSION"
+        run: gh release create ${{ steps.date.output.today }} --draft --notes "llvm = $LLVM_VERSION\nboost = $BOOST_VERSION\n" --title "llvm $LLVM_VERSION, boost $BOOST_VERSION"
 
   linux_x86_64:
     needs: [create_release]
