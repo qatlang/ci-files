@@ -14,14 +14,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set tag name
+        run: echo "::set-env name=TAG_NAME::${{ env.LLVM_VERSION }}-${{ env.BOOST_VERSION }}"
       - name: List releases
         id: list_releases
         run: echo "release_list=$(gh release list)" >> $GITHUB_OUTPUT
       - name: Create release
-        if: ${{ !contains(steps.list_releases.outputs.release_list, "${{LLVM_VERSION}}-${{BOOST_VERSION}}") }}
+        if: ${{ !contains(steps.list_releases.outputs.release_list, env.TAG_NAME) }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "${{LLVM_VERSION}}-${{BOOST_VERSION}}" --notes "llvm = $LLVM_VERSION, boost = $BOOST_VERSION" --title "llvm $LLVM_VERSION, boost $BOOST_VERSION"
+        run: gh release create $TAG_NAME --notes "llvm = $LLVM_VERSION, boost = $BOOST_VERSION" --title "llvm $LLVM_VERSION, boost $BOOST_VERSION"
 
   linux_x86_64:
     needs: [create_release]
@@ -95,4 +97,4 @@ jobs:
       - name: Upload results
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{LLVM_VERSION}}-${{BOOST_VERSION}}" linux-runtimes.tar.xz linux_x64_libs_part_* --clobber
+        run: gh release upload $TAG_NAME linux-runtimes.tar.xz linux_x64_libs_part_* --clobber
