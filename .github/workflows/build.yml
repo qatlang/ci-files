@@ -14,10 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: List releases
+        id: list_releases
+        run: echo "release_list=$(gh release list)" >> $GITHUB_OUTPUT
       - name: Create release
+        if: ${{ !contains(steps.list_releases.outputs.release_list, $LLVM_VERSION-$BOOST_VERSION) }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create $(date +'%Y-%m-%d') --draft --notes "llvm = $LLVM_VERSION, boost = $BOOST_VERSION" --title "llvm $LLVM_VERSION, boost $BOOST_VERSION"
+        run: gh release create $LLVM_VERSION-$BOOST_VERSION --notes "llvm = $LLVM_VERSION, boost = $BOOST_VERSION" --title "llvm $LLVM_VERSION, boost $BOOST_VERSION"
 
   linux_x86_64:
     needs: [create_release]
@@ -26,6 +30,7 @@ jobs:
     env:
       TARGET_TRIPLE: x86_64-unknown-linux-gnu
     steps:
+      - uses: actions/checkout@v4
       - name: Update APT cache
         run: sudo apt update
         
@@ -53,19 +58,7 @@ jobs:
           mkdir linux-runtimes
           
       - name: Install dependencies
-        run: sudo apt --yes install libzstd-dev liblzma-dev libxml2-dev libedit-dev libbz2-dev libtinfo6 terminfo ncurses-bin libncurses-dev libicu-dev
-
-      - name: Download & extract zlib
-        run: |
-          wget -nv https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz
-          tar -xzf zlib-1.3.1.tar.gz
-          mv zlib-1.3.1 zlib
-      - name: Build zlib
-        working-directory: zlib
-        run: |
-          mkdir build
-          cmake -S . -B build -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/libs/zlib" -DCMAKE_CXX_FLAGS="-fPIC"
-          cmake --build build --target install
+        run: sudo apt --yes install libxml2-dev
         
       - name: Download & extract boost
         run: |
@@ -88,16 +81,18 @@ jobs:
         working-directory: llvm-project/llvm
         run: |
           mkdir build
-          cmake -S . -B build/ -G"Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/libs/llvm" -DCMAKE_C_COMPILER="clang-$HOST_CLANG_VERSION" -DCMAKE_CXX_COMPILER="clang++-$HOST_CLANG_VERSION" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DLLVM_RUNTIME_TARGETS="aarch64-unknown-linux-gnu;i686-unknown-linux-gnu;powerpc-unknown-linux-gnu;powerpc64-unknown-linux-gnu;riscv64-unknown-linux-gnu;s390x-unknown-linux-gnu;x86_64-unknown-linux-gnu"  -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_USE_LLD=ON -DLLVM_ENABLE_ZLIB=ON -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=ON -DZLIB_LIBRARY="${{ github.workspace }}/libs/zlib/lib/libz.a" -DLibEdit_INCLUDE_DIRS="/usr/include/editline" -DLibEdit_LIBRARIES="/usr/lib/x86_64-linux-gnu/libedit.a;/usr/lib/x86_64-linux-gnu/libtinfo.a" -DLibXml2_INCLUDE_DIRS="" -DLibXml2_LIBRARY="/usr/lib/x86_64-linux-gnu/libxml2.a"
+          cmake -S . -B build/ -G"Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/libs/llvm" -DCMAKE_C_COMPILER="clang-$HOST_CLANG_VERSION" -DCMAKE_CXX_COMPILER="clang++-$HOST_CLANG_VERSION" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DLLVM_RUNTIME_TARGETS="aarch64-unknown-linux-gnu;i686-unknown-linux-gnu;powerpc-unknown-linux-gnu;powerpc64-unknown-linux-gnu;riscv64-unknown-linux-gnu;s390x-unknown-linux-gnu;x86_64-unknown-linux-gnu" -DCOMPILER_RT_BUILD_BUILTINS=ON -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_USE_LLD=ON -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=ON -DLIBXML2_INCLUDE_DIRS="/usr/include/libxml2" -DLIBXML2_LIBRARY="/usr/lib/x86_64-linux-gnu/libxml2.a"
           cmake --build build --target install
           cp -r ${{ github.workspace }}/libs/llvm/lib/clang/$(cut -d '.' -f 1 <<< $LLVM_VERSION)/lib/* ${{ github.workspace }}/linux-runtimes/
 
       - name: Prepare runtimes
-        run: tar -cf linux-runtimes.tar.xz linux-runtimes
+        run: tar -cvf linux-runtimes.tar.xz linux-runtimes
       - name: Prepare libs
-        run: tar -cf linux-x64-libs.tar.xz libs
+        run: |
+          tar -cvf linux-x64-libs.tar.xz libs
+          split --bytes=1536M linux-x64-libs.tar.xz linux_x64_libs_part_
         
       - name: Upload results
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload $(date +'%Y-%m-%d') linux-runtimes.tar.xz linux-x64.tar.gz
+        run: gh release upload $LLVM_VERSION-$BOOST_VERSION linux-runtimes.tar.xz linux_x64_libs_part_* --clobber
