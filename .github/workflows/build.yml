@@ -6,6 +6,7 @@ env:
   LLVM_VERSION: 20.1.5
   BOOST_VERSION: 1.86.0
   BOOST_VERSION_NAME: 1_86_0
+  TAG_NAME: 20.1.5_1.86.0
   HOST_CLANG_VERSION: 19
 
 jobs:
@@ -14,8 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set tag name
-        run: echo "::set-env name=TAG_NAME::${{ env.LLVM_VERSION }}-${{ env.BOOST_VERSION }}"
       - name: List releases
         id: list_releases
         run: echo "release_list=$(gh release list)" >> $GITHUB_OUTPUT
