@@ -25,7 +25,7 @@ jobs:
       - name: Build icu4c
         working-directory: ./icu4c/arm64
         run: |
-          ../icu/source/configure --prefix="${{ github.workspace }}/libs/icu4c" --enable-static --disable-shared CFLAGS="-std=c11" CXXFLAGS="-std=c++11"
+          ../icu/source/configure --prefix="${{ github.workspace }}/libs/icu4c" --enable-static --disable-shared CFLAGS="-std=c11" CXXFLAGS="-std=c++20"
           make -j8
           sudo make install
 
