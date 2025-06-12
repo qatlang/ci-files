@@ -2,98 +2,39 @@ name: Build qat dependencies
 
 on: workflow_dispatch
 
-env:
-  LLVM_VERSION: 20.1.5
-  BOOST_VERSION: 1.86.0
-  BOOST_VERSION_NAME: 1_86_0
-  TAG_NAME: 20.1.5_1.86.0
-  HOST_CLANG_VERSION: 19
-
 jobs:
-  create_release:
-    name: Create release & tag
-    runs-on: ubuntu-latest
+
+  macos_arm64_icu4c:
+    name: icu4c for macos_arm64
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: List releases
-        id: list_releases
-        run: echo "release_list=$(gh release list)" >> $GITHUB_OUTPUT
-      - name: Create release
-        if: ${{ !contains(steps.list_releases.outputs.release_list, env.TAG_NAME) }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create $TAG_NAME --notes "llvm = $LLVM_VERSION, boost = $BOOST_VERSION" --title "llvm $LLVM_VERSION, boost $BOOST_VERSION"
-
-  linux_x86_64:
-    needs: [create_release]
-    name: x86_64-unknown-linux-gnu
-    runs-on: ubuntu-latest
-    env:
-      TARGET_TRIPLE: x86_64-unknown-linux-gnu
-    steps:
-      - uses: actions/checkout@v4
-      - name: Update APT cache
-        run: sudo apt update
-        
-      - name: Install build tools
-        run: sudo apt --yes install ninja-build clang-19 lld-19
-
-      - name: Install GCC Multilib
-        run: sudo apt --yes install gcc-14-multilib-x86-64-linux-gnux32 gcc-14-multilib-s390x-linux-gnu gcc-14-multilib-powerpc64-linux-gnu gcc-14-multilib-powerpc-linux-gnu gcc-14-multilib-i686-linux-gnu
-
-      - name: Install GCC C++ Multilib
-        run: sudo apt --yes install g++-14-multilib-x86-64-linux-gnux32 g++-14-multilib-s390x-linux-gnu g++-14-multilib-powerpc64-linux-gnu g++-14-multilib-powerpc-linux-gnu g++-14-multilib-i686-linux-gnu
-
-      - name: Install riscv64 toolchain
-        run: sudo apt --yes install binutils-riscv64-linux-gnu cpp-14-riscv64-linux-gnu g++-14-riscv64-linux-gnu gcc-14-riscv64-linux-gnu gcc-riscv64-unknown-elf libc6-dev-riscv64-cross libc6-riscv64-cross libgcc-14-dev-riscv64-cross libstdc++6-riscv64-cross libstdc++-14-dev-riscv64-cross libstdc++-14-pic-riscv64-cross linux-libc-dev-riscv64-cross
-
-      - name: Install aarch64 toolchain
-        run: sudo apt --yes install binutils-aarch64-linux-gnu cpp-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu gcc-14-aarch64-linux-gnu libc6-dev-arm64-cross libc6-arm64-cross libgcc-14-dev-arm64-cross libstdc++6-arm64-cross libstdc++-14-dev-arm64-cross linux-libc-dev-arm64-cross
-        
-      - name: Create library directories
+      - name: Create directories
         run: |
+          mkdir icu4c
+          mkdir icu4c/arm64
           mkdir libs
-          mkdir libs/llvm
-          mkdir libs/boost
-          mkdir libs/zlib
-          mkdir linux-runtimes
-          
-      - name: Install dependencies
-        run: sudo apt --yes install libxml2-dev
+          mkdir libs/icu4c
         
-      - name: Download & extract boost
+      - name: Download icu4c source
+        working-directory: ./icu4c
         run: |
-          wget -nv https://archives.boost.io/release/$BOOST_VERSION/source/boost_$BOOST_VERSION_NAME.tar.gz
-          tar -xzf boost_$BOOST_VERSION_NAME.tar.gz
-          mv boost_$BOOST_VERSION_NAME boost
-      - name: Build boost
-        working-directory: boost
-        run: |
-          echo "using clang : x64 : clang++-19 ;" >> ~/user-config.jam
-          ./bootstrap.sh --prefix="${{ github.workspace }}/libs/boost"
-          ./b2 toolset=clang-x64 install
-      
-      - name: Download & extract LLVM source
-        run: |
-          wget -nv https://github.com/llvm/llvm-project/releases/download/llvmorg-$LLVM_VERSION/llvm-project-$LLVM_VERSION.src.tar.xz
-          tar -xf llvm-project-$LLVM_VERSION.src.tar.xz
-          mv llvm-project-$LLVM_VERSION.src llvm-project
-      - name: Build LLVM
-        working-directory: llvm-project/llvm
-        run: |
-          mkdir build
-          cmake -S . -B build/ -G"Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/libs/llvm" -DCMAKE_C_COMPILER="clang-$HOST_CLANG_VERSION" -DCMAKE_CXX_COMPILER="clang++-$HOST_CLANG_VERSION" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DLLVM_RUNTIME_TARGETS="aarch64-unknown-linux-gnu;i686-unknown-linux-gnu;powerpc-unknown-linux-gnu;powerpc64-unknown-linux-gnu;riscv64-unknown-linux-gnu;s390x-unknown-linux-gnu;x86_64-unknown-linux-gnu" -DCOMPILER_RT_BUILD_BUILTINS=ON -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_USE_LLD=ON -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=ON -DLIBXML2_INCLUDE_DIRS="/usr/include/libxml2" -DLIBXML2_LIBRARY="/usr/lib/x86_64-linux-gnu/libxml2.a"
-          cmake --build build --target install
-          cp -r ${{ github.workspace }}/libs/llvm/lib/clang/$(cut -d '.' -f 1 <<< $LLVM_VERSION)/lib/* ${{ github.workspace }}/linux-runtimes/
+          wget https://github.com/unicode-org/icu/releases/download/release-77-1/icu4c-77_1-src.tgz
+          tar -xzf icu4c-77_1-src.tgz
 
-      - name: Prepare runtimes
-        run: tar -cvf linux-runtimes.tar.xz linux-runtimes
-      - name: Prepare libs
+      - name: Build icu4c
+        working-directory: ./icu4c/arm64
         run: |
-          tar -cvf linux-x64-libs.tar.xz libs
-          split --bytes=1536M linux-x64-libs.tar.xz linux_x64_libs_part_
-        
-      - name: Upload results
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload $TAG_NAME linux-runtimes.tar.xz linux_x64_libs_part_* --clobber
+          ../icu/source/configure --prefix="${{ github.workspace }}/libs/icu4c" --enable-static --disable-shared CFLAGS="-std=c11" CXXFLAGS="-std=c++11"
+          make -j8
+          sudo make install
+
+      - name: Package icu4c
+        working-directory: ./libs
+        run: tar -cvzf icu4c_macos_arm64.tar.gz icu4c
+
+      - name: Upload icu4c
+        uses: actions/upload-artifact@v4
+        with:
+          name: icu4c_macos_arm64
+          path: ${{ github.workspace }}/libs/icu4c_macos_arm64.tar.gz
