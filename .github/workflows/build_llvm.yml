@@ -30,7 +30,7 @@ jobs:
         run: |
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.version }}/llvm-project-${{ inputs.version }}.src.tar.xz
           tar -xf llvm-project-${{ inputs.version }}.src.tar.xz
-          mv llvm-project-${{ inputs.version }} llvm
+          mv llvm-project-${{ inputs.version }}.src llvm
           mkdir llvm_build
       - name: Setup build
         working-directory: llvm/llvm
