@@ -1,0 +1,49 @@
+name: Build LLVM for platforms
+
+on:
+  workflow_dispatch
+    inputs:
+      version:
+        name: "Version"
+        required: true
+        type: string
+
+jobs:
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "llvm_latest" --title "LLVM latest" --notes "Release notes are updated manually, so it is work in progress" --draft
+
+  linux_x86_64:
+    name: LLVM for Linux x86_64
+    needs: [create_release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install cmake, ninja-build, clang
+        run: sudo apt --yes install ninja-build clang-19 llvm-19 lld-19
+      - name: Download LLVM source
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.version }}/llvm-project-${{ inputs.version }}.src.tar.xz
+          tar -xf llvm-project-${{ inputs.version }}.src.tar.xz
+          mv llvm-project-${{ inputs.version }} llvm
+          mkdir llvm_build
+      - name: Setup build
+        working-directory: llvm/llvm
+        run: |
+          cmake -S . -B build/ -G"Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="../../llvm_build" -DCMAKE_C_COMPILER="clang-19" -DCMAKE_CXX_COMPILER="clang++-19" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLLVM_ENABLE_RUNTIMES="compiler-rt;libcxxabi;libunwind" -DLLVM_RUNTIME_TARGETS="x86_64-unknown-linux-gnu" -DCOMPILER_RT_BUILD_BUILTINS=ON -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_USE_LLD=ON -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake --build build --config Release --target install
+          ls ../../llvm_build
+      - name: Compress build
+        working-directory: llvm_build
+        run: |
+          tar -czf llvm_linux_x86_64.tar.gz .
+      - name: Uploading build for x86_64
+        working-directory: llvm_build
+        run: gh release upload "llvm_latest" llvm_linux_x86_64.tar.gz --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
