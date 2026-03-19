@@ -81,7 +81,7 @@ jobs:
       - name: Building for x64
         working-directory: build_x64
         run: |
-          CC=clang-20 CXX=clang++-20 ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c"
+          CC=clang-20 CXX=clang++-20 ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c"
           make -j4
           make install
       - name: Compress build for x64
@@ -96,7 +96,7 @@ jobs:
       - name: Building for i686
         working-directory: build_i686
         run: |
-          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=i686-unknown-linux-gnu" CXXFLAGS=" --target=i686-unknown-linux-gnu" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="i686-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=i686-unknown-linux-gnu" CXXFLAGS=" --target=i686-unknown-linux-gnu" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="i686-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
           make -j4
           make install
       - name: Compress build for i686
@@ -111,7 +111,7 @@ jobs:
       - name: Building for arm64
         working-directory: build_arm64
         run: |
-          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=aarch64-unknown-linux-gnu" CXXFLAGS=" --target=aarch64-unknown-linux-gnu" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="aarch64-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=aarch64-unknown-linux-gnu" CXXFLAGS=" --target=aarch64-unknown-linux-gnu" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="aarch64-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
           make -j4
           make install
       - name: Compress build for arm64
@@ -126,7 +126,7 @@ jobs:
       - name: Building for riscv64
         working-directory: build_riscv64
         run: |
-          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=riscv64-unknown-linux-gnu" CXXFLAGS=" --target=riscv64-unknown-linux-gnu" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="riscv64-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=riscv64-unknown-linux-gnu" CXXFLAGS=" --target=riscv64-unknown-linux-gnu" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="riscv64-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
           make -j4
           make install
       - name: Compress build for riscv64
@@ -141,7 +141,7 @@ jobs:
       - name: Building for powerpc64le
         working-directory: build_ppc64le
         run: |
-          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=powerpc64le-unknown-linux-gnu" CXXFLAGS=" --target=powerpc64le-unknown-linux-gnu" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="powerpc64le-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=powerpc64le-unknown-linux-gnu" CXXFLAGS=" --target=powerpc64le-unknown-linux-gnu" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="powerpc64le-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
           make -j4
           make install
       - name: Compress build for powerpc64le
@@ -156,7 +156,7 @@ jobs:
       - name: Building for powerpc64
         working-directory: build_ppc64
         run: |
-          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=powerpc64-unknown-linux-gnu" CXXFLAGS=" --target=powerpc64-unknown-linux-gnu" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="powerpc64-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=powerpc64-unknown-linux-gnu" CXXFLAGS=" --target=powerpc64-unknown-linux-gnu" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="powerpc64-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
           make -j4
           make install
       - name: Compress build for powerpc64
@@ -171,7 +171,7 @@ jobs:
       - name: Building for s390x
         working-directory: build_s390x
         run: |
-          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=s390x-unknown-linux-gnu" CXXFLAGS=" --target=s390x-unknown-linux-gnu" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="s390x-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=s390x-unknown-linux-gnu" CXXFLAGS=" --target=s390x-unknown-linux-gnu" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="s390x-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
           make -j4
           make install
       - name: Compress build for s390x
@@ -186,7 +186,7 @@ jobs:
       - name: Building for armhf
         working-directory: build_armhf
         run: |
-          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=arm-unknown-linux-gnueabihf" CXXFLAGS=" --target=arm-unknown-linux-gnueabihf" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="arm-unknown-linux-gnueabihf" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=arm-unknown-linux-gnueabihf" CXXFLAGS=" --target=arm-unknown-linux-gnueabihf" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="arm-unknown-linux-gnueabihf" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
           make -j4
           make install
       - name: Compress build for armhf
@@ -201,7 +201,7 @@ jobs:
       - name: Building for armel
         working-directory: build_armel
         run: |
-          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=arm-unknown-linux-gnueabi" CXXFLAGS=" --target=arm-unknown-linux-gnueabi" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="arm-unknown-linux-gnueabi" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=arm-unknown-linux-gnueabi" CXXFLAGS=" --target=arm-unknown-linux-gnueabi" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="arm-unknown-linux-gnueabi" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
           make -j4
           make install
       - name: Compress build for armel
