@@ -1,0 +1,837 @@
+name: Linux (x64, i686, arm64, riscv64, powerpc64le, powerpc64, s390x, armhf, armel)
+
+on:
+  workflow_dispatch:
+    inputs:
+      llvmVersion:
+        required: true
+        default: "22.1.1"
+        type: string
+      boostVersion:
+        required: true
+        default: "1.90.0"
+        type: string
+      icuVersion:
+        required: true
+        default: "78.3"
+        type: string
+
+jobs:
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+          gh release create "$RELEASE_NAME" --title "llvm ${{ inputs.llvmVersion }}, boost ${{ inputs.boostVersion }}, icu4c ${{ inputs.icuVersion }}" --notes "Release notes are updated manually, so it is work in progress" --draft
+  create_llvm_x64_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "llvm${{ inputs.llvmVersion }}" --title "llvm ${{ inputs.llvmVersion }}" --notes "LLVM ${{ inputs.llvmVersion }}"
+
+  icu4c_linux:
+    name: icu4c for Linux
+    needs: [create_release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set release name
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+      - name: Install build tools for x64
+        run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
+      - name: Install build tools for i686
+        run: sudo apt install --yes binutils-i686-linux-gnu cpp-14-i686-linux-gnu g++-14-i686-linux-gnu gcc-14-i686-linux-gnu libc6-dev-i386-cross libc6-i386-cross libgcc-14-dev-i386-cross libstdc++6-i386-cross libx32stdc++-14-dev-i386-cross libstdc++-14-dev-i386-cross libstdc++-14-pic-i386-cross linux-libc-dev-i386-cross
+      - name: Install build tools for arm64
+        run: sudo apt install --yes install binutils-aarch64-linux-gnu cpp-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu gcc-14-aarch64-linux-gnu libc6-dev-arm64-cross libc6-arm64-cross libgcc-14-dev-arm64-cross libstdc++6-arm64-cross libstdc++-14-dev-arm64-cross linux-libc-dev-arm64-cross
+      - name: Install build tools for riscv64
+        run: sudo apt install --yes install binutils-riscv64-linux-gnu cpp-14-riscv64-linux-gnu g++-14-riscv64-linux-gnu gcc-14-riscv64-linux-gnu gcc-riscv64-unknown-elf libc6-dev-riscv64-cross libc6-riscv64-cross libgcc-14-dev-riscv64-cross libstdc++6-riscv64-cross libstdc++-14-dev-riscv64-cross libstdc++-14-pic-riscv64-cross linux-libc-dev-riscv64-cross
+      - name: Install build tools for powerpc64le
+        run: sudo apt install --yes binutils-powerpc64le-linux-gnu cpp-14-powerpc64le-linux-gnu g++-14-powerpc64le-linux-gnu gcc-14-powerpc64le-linux-gnu libc6-dev-ppc64el-cross libc6-ppc64el-cross libgcc-14-dev-ppc64el-cross libstdc++6-ppc64el-cross libstdc++-14-dev-ppc64el-cross libstdc++-14-pic-ppc64el-cross linux-libc-dev-ppc64el-cross
+      - name: Install build tools for powerpc64
+        run: sudo apt install --yes binutils-powerpc64-linux-gnu cpp-14-powerpc64-linux-gnu g++-14-powerpc64-linux-gnu gcc-14-powerpc64-linux-gnu libc6-dev-ppc64-cross libc6-ppc64-cross libgcc-14-dev-ppc64-cross libstdc++6-ppc64-cross libstdc++-14-dev-ppc64-cross libstdc++-14-pic-ppc64-cross linux-libc-dev-ppc64-cross
+      - name: Install build tools for s390x
+        run: sudo apt install --yes binutils-s390x-linux-gnu cpp-14-s390x-linux-gnu g++-14-s390x-linux-gnu gcc-14-s390x-linux-gnu libc6-dev-s390x-cross libc6-s390x-cross libgcc-14-dev-s390x-cross libstdc++6-s390x-cross libstdc++-14-dev-s390x-cross libstdc++-14-pic-s390x-cross linux-libc-dev-s390x-cross
+      - name: Install build tools for armhf
+        run: sudo apt install --yes binutils-arm-linux-gnueabihf cpp-14-arm-linux-gnueabihf g++-14-arm-linux-gnueabihf gcc-14-arm-linux-gnueabihf libc6-dev-armhf-cross libc6-armhf-cross libgcc-14-dev-armhf-cross libstdc++6-armhf-cross libstdc++-14-dev-armhf-cross libstdc++-14-pic-armhf-cross linux-libc-dev-armhf-cross
+      - name: Install build tools for armel
+        run: sudo apt install --yes binutils-arm-linux-gnueabi cpp-14-arm-linux-gnueabi g++-14-arm-linux-gnueabi gcc-14-arm-linux-gnueabi libc6-dev-armel-cross libc6-armel-cross libgcc-14-dev-armel-cross libstdc++6-armel-cross libstdc++-14-dev-armel-cross libstdc++-14-pic-armel-cross linux-libc-dev-armel-cross
+      - name: Download icu4c source
+        run: |
+          wget https://github.com/unicode-org/icu/releases/download/release-${{ inputs.icuVersion }}/icu4c-${{ inputs.icuVersion }}-sources.tgz
+          tar -xzf icu4c-${{ inputs.icuVersion }}-sources.tgz
+          mkdir icu4c
+          mkdir build_x64
+          mkdir build_i686
+          mkdir build_arm64
+          mkdir build_riscv64
+          mkdir build_ppc64le
+          mkdir build_ppc64
+          mkdir build_s390x
+          mkdir build_armhf
+          mkdir build_armel
+      - name: Building for x64
+        working-directory: build_x64
+        run: |
+          CC=clang-20 CXX=clang++-20 ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c"
+          make -j4
+          make install
+      - name: Compress build for x64
+        run: tar -czf icu4c_linux_x64.tar.gz icu4c
+      - name: Upload build for x64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" icu4c_linux_x64.tar.gz --clobber
+      - name: Clean build directory
+        run: rm -rf icu4c/*
+
+      - name: Building for i686
+        working-directory: build_i686
+        run: |
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=i686-unknown-linux-gnu" CXXFLAGS=" --target=i686-unknown-linux-gnu" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="i686-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          make -j4
+          make install
+      - name: Compress build for i686
+        run: tar -czf icu4c_linux_i686.tar.gz icu4c
+      - name: Upload build for i686
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" icu4c_linux_i686.tar.gz --clobber
+      - name: Clean build directory
+        run: rm -rf icu4c/*
+
+      - name: Building for arm64
+        working-directory: build_arm64
+        run: |
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=aarch64-unknown-linux-gnu" CXXFLAGS=" --target=aarch64-unknown-linux-gnu" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="aarch64-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          make -j4
+          make install
+      - name: Compress build for arm64
+        run: tar -czf icu4c_linux_arm64.tar.gz icu4c
+      - name: Upload build for arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" icu4c_linux_arm64.tar.gz --clobber
+      - name: Clean build directory
+        run: rm -rf icu4c/*
+
+      - name: Building for riscv64
+        working-directory: build_riscv64
+        run: |
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=riscv64-unknown-linux-gnu" CXXFLAGS=" --target=riscv64-unknown-linux-gnu" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="riscv64-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          make -j4
+          make install
+      - name: Compress build for riscv64
+        run: tar -czf icu4c_linux_riscv64.tar.gz icu4c
+      - name: Upload build for riscv64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" icu4c_linux_riscv64.tar.gz --clobber
+      - name: Clean build directory
+        run: rm -rf icu4c/*
+
+      - name: Building for powerpc64le
+        working-directory: build_ppc64le
+        run: |
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=powerpc64le-unknown-linux-gnu" CXXFLAGS=" --target=powerpc64le-unknown-linux-gnu" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="powerpc64le-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          make -j4
+          make install
+      - name: Compress build for powerpc64le
+        run: tar -czf icu4c_linux_ppc64le.tar.gz icu4c
+      - name: Upload build for powerpc64le
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" icu4c_linux_ppc64le.tar.gz --clobber
+      - name: Clean build directory
+        run: rm -rf icu4c/*
+
+      - name: Building for powerpc64
+        working-directory: build_ppc64
+        run: |
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=powerpc64-unknown-linux-gnu" CXXFLAGS=" --target=powerpc64-unknown-linux-gnu" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="powerpc64-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          make -j4
+          make install
+      - name: Compress build for powerpc64
+        run: tar -czf icu4c_linux_ppc64.tar.gz icu4c
+      - name: Upload build for powerpc64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" icu4c_linux_ppc64.tar.gz --clobber
+      - name: Clean build directory
+        run: rm -rf icu4c/*
+
+      - name: Building for s390x
+        working-directory: build_s390x
+        run: |
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=s390x-unknown-linux-gnu" CXXFLAGS=" --target=s390x-unknown-linux-gnu" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="s390x-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          make -j4
+          make install
+      - name: Compress build for s390x
+        run: tar -czf icu4c_linux_s390x.tar.gz icu4c
+      - name: Upload build for s390x
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" icu4c_linux_s390x.tar.gz --clobber
+      - name: Clean build directory
+        run: rm -rf icu4c/*
+
+      - name: Building for armhf
+        working-directory: build_armhf
+        run: |
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=arm-unknown-linux-gnueabihf" CXXFLAGS=" --target=arm-unknown-linux-gnueabihf" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="arm-unknown-linux-gnueabihf" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          make -j4
+          make install
+      - name: Compress build for armhf
+        run: tar -czf icu4c_linux_armhf.tar.gz icu4c
+      - name: Upload build for armhf
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" icu4c_linux_armhf.tar.gz --clobber
+      - name: Clean build directory
+        run: rm -rf icu4c/*
+
+      - name: Building for armel
+        working-directory: build_armel
+        run: |
+          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=arm-unknown-linux-gnueabi" CXXFLAGS=" --target=arm-unknown-linux-gnueabi" ./icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="arm-unknown-linux-gnueabi" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
+          make -j4
+          make install
+      - name: Compress build for armel
+        run: tar -czf icu4c_linux_armel.tar.gz icu4c
+      - name: Upload build for armel
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" icu4c_linux_armel.tar.gz --clobber
+      - name: Clean build directory
+        run: rm -rf icu4c/*
+
+  boost_linux:
+    name: Boost for Linux
+    needs: [create_release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set release name
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+      - name: Install build tools for x64
+        run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
+      - name: Install build tools for i686
+        run: sudo apt install --yes binutils-i686-linux-gnu cpp-14-i686-linux-gnu g++-14-i686-linux-gnu gcc-14-i686-linux-gnu libc6-dev-i386-cross libc6-i386-cross libgcc-14-dev-i386-cross libstdc++6-i386-cross libx32stdc++-14-dev-i386-cross libstdc++-14-dev-i386-cross libstdc++-14-pic-i386-cross linux-libc-dev-i386-cross
+      - name: Install build tools for arm64
+        run: sudo apt install --yes install binutils-aarch64-linux-gnu cpp-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu gcc-14-aarch64-linux-gnu libc6-dev-arm64-cross libc6-arm64-cross libgcc-14-dev-arm64-cross libstdc++6-arm64-cross libstdc++-14-dev-arm64-cross linux-libc-dev-arm64-cross
+      - name: Install build tools for riscv64
+        run: sudo apt install --yes install binutils-riscv64-linux-gnu cpp-14-riscv64-linux-gnu g++-14-riscv64-linux-gnu gcc-14-riscv64-linux-gnu gcc-riscv64-unknown-elf libc6-dev-riscv64-cross libc6-riscv64-cross libgcc-14-dev-riscv64-cross libstdc++6-riscv64-cross libstdc++-14-dev-riscv64-cross libstdc++-14-pic-riscv64-cross linux-libc-dev-riscv64-cross
+      - name: Install build tools for powerpc64le
+        run: sudo apt install --yes binutils-powerpc64le-linux-gnu cpp-14-powerpc64le-linux-gnu g++-14-powerpc64le-linux-gnu gcc-14-powerpc64le-linux-gnu libc6-dev-ppc64el-cross libc6-ppc64el-cross libgcc-14-dev-ppc64el-cross libstdc++6-ppc64el-cross libstdc++-14-dev-ppc64el-cross libstdc++-14-pic-ppc64el-cross linux-libc-dev-ppc64el-cross
+      - name: Install build tools for powerpc64
+        run: sudo apt install --yes binutils-powerpc64-linux-gnu cpp-14-powerpc64-linux-gnu g++-14-powerpc64-linux-gnu gcc-14-powerpc64-linux-gnu libc6-dev-ppc64-cross libc6-ppc64-cross libgcc-14-dev-ppc64-cross libstdc++6-ppc64-cross libstdc++-14-dev-ppc64-cross libstdc++-14-pic-ppc64-cross linux-libc-dev-ppc64-cross
+      - name: Install build tools for s390x
+        run: sudo apt install --yes binutils-s390x-linux-gnu cpp-14-s390x-linux-gnu g++-14-s390x-linux-gnu gcc-14-s390x-linux-gnu libc6-dev-s390x-cross libc6-s390x-cross libgcc-14-dev-s390x-cross libstdc++6-s390x-cross libstdc++-14-dev-s390x-cross libstdc++-14-pic-s390x-cross linux-libc-dev-s390x-cross
+      - name: Install build tools for armhf
+        run: sudo apt install --yes binutils-arm-linux-gnueabihf cpp-14-arm-linux-gnueabihf g++-14-arm-linux-gnueabihf gcc-14-arm-linux-gnueabihf libc6-dev-armhf-cross libc6-armhf-cross libgcc-14-dev-armhf-cross libstdc++6-armhf-cross libstdc++-14-dev-armhf-cross libstdc++-14-pic-armhf-cross linux-libc-dev-armhf-cross
+      - name: Install build tools for armel
+        run: sudo apt install --yes binutils-arm-linux-gnueabi cpp-14-arm-linux-gnueabi g++-14-arm-linux-gnueabi gcc-14-arm-linux-gnueabi libc6-dev-armel-cross libc6-armel-cross libgcc-14-dev-armel-cross libstdc++6-armel-cross libstdc++-14-dev-armel-cross libstdc++-14-pic-armel-cross linux-libc-dev-armel-cross
+      - name: Download boost source
+        run: |
+          wget https://github.com/boostorg/boost/releases/download/boost-${{ inputs.boostVersion }}/boost-${{ inputs.boostVersion }}-b2-nodocs.tar.gz
+          tar -xzf boost-${{ inputs.boostVersion }}-b2-nodocs.tar.gz
+          mv boost-${{ inputs.boostVersion }} boost-project
+          mkdir boost
+      - name: Building b2
+        working-directory: boost-project
+        run: ./bootstrap.sh
+      - name: Setting up user-config.jam
+        run: cp ./config/user-config.jam ~/user-config.jam
+
+      - name: Building for x64
+        working-directory: boost-project
+        run: ./b2 install toolset=clang-x64 --prefix="$GITHUB_WORKSPACE/boost"
+      - name: Compress build for x64
+        run: tar -czf boost_linux_x64.tar.gz boost
+      - name: Upload build for x64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" boost_linux_x64.tar.gz --clobber
+      - name: Clear build directory
+        run: |
+          rm -rf boost/*
+          rm -rf boost_linux_x64.tar.gz
+
+      - name: Building for i686
+        working-directory: boost-project
+        run: ./b2 install toolset=clang-i686 --prefix="$GITHUB_WORKSPACE/boost"
+      - name: Compress build for i686
+        run: tar -czf boost_linux_i686.tar.gz boost
+      - name: Upload build for i686
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" boost_linux_i686.tar.gz --clobber
+      - name: Clear build directory
+        run: |
+          rm -rf boost/*
+          rm -rf boost_linux_i686.tar.gz
+
+      - name: Building for arm64
+        working-directory: boost-project
+        run: ./b2 install toolset=clang-arm64 --prefix="$GITHUB_WORKSPACE/boost"
+      - name: Compress build for arm64
+        run: tar -czf boost_linux_arm64.tar.gz boost
+      - name: Upload build for arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" boost_linux_arm64.tar.gz --clobber
+      - name: Clear build directory
+        run: |
+          rm -rf boost/*
+          rm -rf boost_linux_arm64.tar.gz
+
+      - name: Building for riscv64
+        working-directory: boost-project
+        run: ./b2 install toolset=clang-riscv64 --prefix="$GITHUB_WORKSPACE/boost"
+      - name: Compress build for riscv64
+        run: tar -czf boost_linux_riscv64.tar.gz boost
+      - name: Upload build for riscv64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" boost_linux_riscv64.tar.gz --clobber
+      - name: Clear build directory
+        run: |
+          rm -rf boost/*
+          rm -rf boost_linux_riscv64.tar.gz
+
+      - name: Building for s390x
+        working-directory: boost-project
+        run: ./b2 install toolset=clang-s390x --prefix="$GITHUB_WORKSPACE/boost"
+      - name: Compress build for s390x
+        run: tar -czf boost_linux_s390x.tar.gz boost
+      - name: Upload build for s390x
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" boost_linux_s390x.tar.gz --clobber
+      - name: Clear build directory
+        run: |
+          rm -rf boost/*
+          rm -rf boost_linux_s390x.tar.gz
+
+      - name: Building for powerpc64le
+        working-directory: boost-project
+        run: ./b2 install toolset=clang-powerpc64le --prefix="$GITHUB_WORKSPACE/boost"
+      - name: Compress build for powerpc64le
+        run: tar -czf boost_linux_ppc64le.tar.gz boost
+      - name: Upload build for powerpc64le
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" boost_linux_ppc64le.tar.gz --clobber
+      - name: Clear build directory
+        run: |
+          rm -rf boost/*
+          rm -rf boost_linux_ppc64le.tar.gz
+
+      - name: Building for powerpc64
+        working-directory: boost-project
+        run: ./b2 install toolset=clang-powerpc64 --prefix="$GITHUB_WORKSPACE/boost"
+      - name: Compress build for powerpc64
+        run: tar -czf boost_linux_ppc64.tar.gz boost
+      - name: Upload build for powerpc64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" boost_linux_ppc64.tar.gz --clobber
+      - name: Clear build directory
+        run: |
+          rm -rf boost/*
+          rm -rf boost_linux_ppc64.tar.gz
+
+      - name: Building for armhf
+        working-directory: boost-project
+        run: ./b2 install toolset=gcc-armhf --prefix="$GITHUB_WORKSPACE/boost"
+      - name: Compress build for armhf
+        run: tar -czf boost_linux_armhf.tar.gz boost
+      - name: Upload build for armhf
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" boost_linux_armhf.tar.gz --clobber
+      - name: Clear build directory
+        run: |
+          rm -rf boost/*
+          rm -rf boost_linux_armhf.tar.gz
+
+      - name: Building for armel
+        working-directory: boost-project
+        run: ./b2 install toolset=gcc-armel --prefix="$GITHUB_WORKSPACE/boost"
+      - name: Compress build for armel
+        run: tar -czf boost_linux_armel.tar.gz boost
+      - name: Upload build for armel
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" boost_linux_armel.tar.gz --clobber
+      - name: Clear build directory
+        run: |
+          rm -rf boost/*
+          rm -rf boost_linux_armel.tar.gz
+
+  llvm_linux_x64:
+    name: LLVM for Linux
+    needs: [create_release, create_llvm_x64_release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set release name
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+      - name: Install build tools for x64
+        run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
+      - name: Download LLVM source
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
+          mkdir llvm
+          mkdir runtimes
+
+      - name: Build LLVM for x64
+        working-directory: llvm-project/llvm
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_C_COMPILER="clang-20" -DCMAKE_CXX_COMPILER="clang++-20" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLLVM_ENABLE_RUNTIMES="compiler-rt;libcxxabi;libunwind" -DLLVM_RUNTIME_TARGETS="x86_64-unknown-linux-gnu" -DCOMPILER_RT_BUILD_BUILTINS=ON -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_USE_LLD=ON -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake --build build --config Release --target install
+      - name: Compress LLVM for x64
+        run: tar -czf llvm_linux_x64.tar.gz llvm
+      - name: Upload LLVM for x64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" llvm_linux_x64.tar.gz --clobber
+          gh release upload "llvm${{ inputs.llvmVersion }}" llvm_linux_x64.tar.gz --clobber
+          rm llvm_linux_x64.tar.gz
+      - name: Build runtimes for x64
+        working-directory: llvm-project/runtimes
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DLLVM_RUNTIME_TARGETS="x86_64-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="x86_64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="x86_64-unknown-linux-gnu" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF
+          cmake --build build --config Release --parallel 4 --target install
+      - name: Compress runtimes for x64
+        run: tar -czf runtimes_linux_x64.tar.gz runtimes
+      - name: Upload runtimes for x64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" runtimes_linux_x64.tar.gz --clobber
+          rm runtimes_linux_x64.tar.gz
+
+  llvm_linux_i686:
+    name: LLVM for Linux
+    needs: [create_release, create_llvm_x64_release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set release name
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+      - name: Install build tools for x64
+        run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
+      - name: Install build tools for i686
+        run: sudo apt install --yes binutils-i686-linux-gnu cpp-14-i686-linux-gnu g++-14-i686-linux-gnu gcc-14-i686-linux-gnu libc6-dev-i386-cross libc6-i386-cross libgcc-14-dev-i386-cross libstdc++6-i386-cross libx32stdc++-14-dev-i386-cross libstdc++-14-dev-i386-cross libstdc++-14-pic-i386-cross linux-libc-dev-i386-cross
+      - name: Download LLVM source
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
+          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          tar -xzf llvm_linux_x64.tar.xz
+          mv llvm llvm_build_x64
+          mkdir llvm
+          mkdir runtimes
+
+      - name: Build LLVM for i686
+        working-directory: llvm-project/llvm
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/i686.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="i686-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="i686-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake --build build --config Release --target install
+      - name: Compress LLVM for i686
+        run: tar -czf llvm_linux_i686.tar.gz llvm
+      - name: Upload LLVM for i686
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" llvm_linux_i686.tar.gz --clobber
+          rm llvm_linux_i686.tar.gz
+      - name: Build runtimes for i686
+        working-directory: llvm-project/runtimes
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/i686.cmake" -DLLVM_RUNTIME_TARGETS="i686-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="i686-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="i686-unknown-linux-gnu" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake --build build --config Release --parallel 4 --target install
+      - name: Compress runtimes for i686
+        run: tar -czf runtimes_linux_i686.tar.gz runtimes
+      - name: Upload runtimes for i686
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" runtimes_linux_i686.tar.gz --clobber
+          rm runtimes_linux_i686.tar.gz
+
+  llvm_linux_arm64:
+    name: LLVM for Linux arm64
+    needs: [create_release, create_llvm_x64_release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set release name
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+      - name: Install build tools for x64
+        run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
+      - name: Install build tools for arm64
+        run: sudo apt install --yes install binutils-aarch64-linux-gnu cpp-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu gcc-14-aarch64-linux-gnu libc6-dev-arm64-cross libc6-arm64-cross libgcc-14-dev-arm64-cross libstdc++6-arm64-cross libstdc++-14-dev-arm64-cross linux-libc-dev-arm64-cross
+      - name: Download LLVM source
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
+          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          tar -xzf llvm_linux_x64.tar.xz
+          mv llvm llvm_build_x64
+          mkdir llvm
+          mkdir runtimes
+
+      - name: Build LLVM for arm64
+        working-directory: llvm-project/llvm
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/arm64.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="aarch64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="aarch64-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake --build build --config Release --target install
+      - name: Compress LLVM for arm64
+        run: tar -czf llvm_linux_arm64.tar.gz llvm
+      - name: Upload LLVM for arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" llvm_linux_arm64.tar.gz --clobber
+          rm llvm_linux_arm64.tar.gz
+      - name: Build runtimes for arm64
+        working-directory: llvm-project/runtimes
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/arm64.cmake" -DLLVM_RUNTIME_TARGETS="aarch64-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="aarch64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="aarch64-unknown-linux-gnu" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake --build build --config Release --parallel 4 --target install
+      - name: Compress runtimes for arm64
+        run: tar -czf runtimes_linux_arm64.tar.gz runtimes
+      - name: Upload runtimes for arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" runtimes_linux_arm64.tar.gz --clobber
+          rm runtimes_linux_arm64.tar.gz
+
+  llvm_linux_riscv64:
+    name: LLVM for Linux riscv64
+    needs: [create_release, create_llvm_x64_release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set release name
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+      - name: Install build tools for x64
+        run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
+      - name: Install build tools for riscv64
+        run: sudo apt install --yes install binutils-riscv64-linux-gnu cpp-14-riscv64-linux-gnu g++-14-riscv64-linux-gnu gcc-14-riscv64-linux-gnu gcc-riscv64-unknown-elf libc6-dev-riscv64-cross libc6-riscv64-cross libgcc-14-dev-riscv64-cross libstdc++6-riscv64-cross libstdc++-14-dev-riscv64-cross libstdc++-14-pic-riscv64-cross linux-libc-dev-riscv64-cross
+      - name: Download LLVM source
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
+          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          tar -xzf llvm_linux_x64.tar.xz
+          mv llvm llvm_build_x64
+          mkdir llvm
+          mkdir runtimes
+
+      - name: Build LLVM for riscv64
+        working-directory: llvm-project/llvm
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/riscv64.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="riscv64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="riscv64-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake --build build --config Release --target install
+      - name: Compress LLVM for riscv64
+        run: tar -czf llvm_linux_riscv64.tar.gz llvm
+      - name: Upload LLVM for riscv64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" llvm_linux_riscv64.tar.gz --clobber
+          rm llvm_linux_riscv64.tar.gz
+      - name: Build runtimes for riscv64
+        working-directory: llvm-project/runtimes
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/riscv64.cmake" -DLLVM_RUNTIME_TARGETS="riscv64-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="riscv64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="riscv64-unknown-linux-gnu" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake --build build --config Release --parallel 4 --target install
+      - name: Compress runtimes for riscv64
+        run: tar -czf runtimes_linux_riscv64.tar.gz runtimes
+      - name: Upload runtimes for riscv64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" runtimes_linux_riscv64.tar.gz --clobber
+          rm runtimes_linux_riscv64.tar.gz
+
+  llvm_linux_ppc64le:
+    name: LLVM for Linux powerpc64le
+    needs: [create_release, create_llvm_x64_release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set release name
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+      - name: Install build tools for x64
+        run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
+      - name: Install build tools for powerpc64le
+        run: sudo apt install --yes binutils-powerpc64le-linux-gnu cpp-14-powerpc64le-linux-gnu g++-14-powerpc64le-linux-gnu gcc-14-powerpc64le-linux-gnu libc6-dev-ppc64el-cross libc6-ppc64el-cross libgcc-14-dev-ppc64el-cross libstdc++6-ppc64el-cross libstdc++-14-dev-ppc64el-cross libstdc++-14-pic-ppc64el-cross linux-libc-dev-ppc64el-cross
+      - name: Download LLVM source
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
+          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          tar -xzf llvm_linux_x64.tar.xz
+          mv llvm llvm_build_x64
+          mkdir llvm
+          mkdir runtimes
+
+      - name: Build LLVM for powerpc64le
+        working-directory: llvm-project/llvm
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/ppc64le.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="powerpc64le-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="powerpc64le-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake --build build --config Release --target install
+      - name: Compress LLVM for powerpc64le
+        run: tar -czf llvm_linux_ppc64le.tar.gz llvm
+      - name: Upload LLVM for powerpc64le
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" llvm_linux_ppc64le.tar.gz --clobber
+          rm llvm_linux_ppc64le.tar.gz
+      - name: Build runtimes for powerpc64le
+        working-directory: llvm-project/runtimes
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/ppc64le.cmake" -DLLVM_RUNTIME_TARGETS="powerpc64le-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="powerpc64le-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="powerpc64le-unknown-linux-gnu" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake --build build --config Release --parallel 4 --target install
+      - name: Compress runtimes for powerpc64le
+        run: tar -czf runtimes_linux_ppc64le.tar.gz runtimes
+      - name: Upload runtimes for powerpc64le
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" runtimes_linux_ppc64le.tar.gz --clobber
+          rm runtimes_linux_ppc64le.tar.gz
+
+  llvm_linux_powerpc64:
+    name: LLVM for Linux powerpc64
+    needs: [create_release, create_llvm_x64_release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set release name
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+      - name: Install build tools for x64
+        run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
+      - name: Install build tools for powerpc64
+        run: sudo apt install --yes binutils-powerpc64-linux-gnu cpp-14-powerpc64-linux-gnu g++-14-powerpc64-linux-gnu gcc-14-powerpc64-linux-gnu libc6-dev-ppc64-cross libc6-ppc64-cross libgcc-14-dev-ppc64-cross libstdc++6-ppc64-cross libstdc++-14-dev-ppc64-cross libstdc++-14-pic-ppc64-cross linux-libc-dev-ppc64-cross
+      - name: Download LLVM source
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
+          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          tar -xzf llvm_linux_x64.tar.xz
+          mv llvm llvm_build_x64
+          mkdir llvm
+          mkdir runtimes
+
+      - name: Build LLVM for powerpc64
+        working-directory: llvm-project/llvm
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/ppc64.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="powerpc64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="powerpc64-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake --build build --config Release --target install
+      - name: Compress LLVM for powerpc64
+        run: tar -czf llvm_linux_ppc64.tar.gz llvm
+      - name: Upload LLVM for powerpc64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" llvm_linux_ppc64.tar.gz --clobber
+          rm llvm_linux_ppc64.tar.gz
+      - name: Build runtimes for powerpc64
+        working-directory: llvm-project/runtimes
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/ppc64le.cmake" -DLLVM_RUNTIME_TARGETS="powerpc64-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="powerpc64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="powerpc64-unknown-linux-gnu" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake --build build --config Release --parallel 4 --target install
+      - name: Compress runtimes for powerpc64
+        run: tar -czf runtimes_linux_ppc64.tar.gz runtimes
+      - name: Upload runtimes for powerpc64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" runtimes_linux_ppc64.tar.gz --clobber
+          rm runtimes_linux_ppc64.tar.gz
+
+  llvm_linux_s390x:
+    name: LLVM for Linux s390x
+    needs: [create_release, create_llvm_x64_release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set release name
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+      - name: Install build tools for x64
+        run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
+      - name: Install build tools for s390x
+        run: sudo apt install --yes binutils-s390x-linux-gnu cpp-14-s390x-linux-gnu g++-14-s390x-linux-gnu gcc-14-s390x-linux-gnu libc6-dev-s390x-cross libc6-s390x-cross libgcc-14-dev-s390x-cross libstdc++6-s390x-cross libstdc++-14-dev-s390x-cross libstdc++-14-pic-s390x-cross linux-libc-dev-s390x-cross
+      - name: Download LLVM source
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
+          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          tar -xzf llvm_linux_x64.tar.xz
+          mv llvm llvm_build_x64
+          mkdir llvm
+          mkdir runtimes
+
+      - name: Build LLVM for s390x
+        working-directory: llvm-project/llvm
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/s390x.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="s390x-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="s390x-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake --build build --config Release --target install
+      - name: Compress LLVM for s390x
+        run: tar -czf llvm_linux_s390x.tar.gz llvm
+      - name: Upload LLVM for s390x
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" llvm_linux_s390x.tar.gz --clobber
+          rm llvm_linux_s390x.tar.gz
+      - name: Build runtimes for s390x
+        working-directory: llvm-project/runtimes
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/s390x.cmake" -DLLVM_RUNTIME_TARGETS="s390x-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="s390x-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="s390x-unknown-linux-gnu" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake --build build --config Release --parallel 4 --target install
+      - name: Compress runtimes for s390x
+        run: tar -czf runtimes_linux_s390x.tar.gz runtimes
+      - name: Upload runtimes for s390x
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" runtimes_linux_s390x.tar.gz --clobber
+          rm runtimes_linux_s390x.tar.gz
+
+  llvm_linux_armhf:
+    name: LLVM for Linux armhf
+    needs: [create_release, create_llvm_x64_release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set release name
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+      - name: Install build tools for x64
+        run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
+      - name: Install build tools for armhf
+        run: sudo apt install --yes binutils-arm-linux-gnueabihf cpp-14-arm-linux-gnueabihf g++-14-arm-linux-gnueabihf gcc-14-arm-linux-gnueabihf libc6-dev-armhf-cross libc6-armhf-cross libgcc-14-dev-armhf-cross libstdc++6-armhf-cross libstdc++-14-dev-armhf-cross libstdc++-14-pic-armhf-cross linux-libc-dev-armhf-cross
+      - name: Download LLVM source
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
+          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          tar -xzf llvm_linux_x64.tar.xz
+          mv llvm llvm_build_x64
+          mkdir llvm
+          mkdir runtimes
+
+      - name: Build LLVM for armhf
+        working-directory: llvm-project/llvm
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/armhf.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="arm-unknown-linux-gnueabihf" -DLLVM_HOST_TRIPLE="arm-unknown-linux-gnueabihf" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake --build build --config Release --target install
+      - name: Compress LLVM for armhf
+        run: tar -czf llvm_linux_armhf.tar.gz llvm
+      - name: Upload LLVM for armhf
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" llvm_linux_armhf.tar.gz --clobber
+          rm llvm_linux_armhf.tar.gz
+      - name: Build runtimes for armhf
+        working-directory: llvm-project/runtimes
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/armhf.cmake" -DLLVM_RUNTIME_TARGETS="arm-unknown-linux-gnueabihf" -DLLVM_DEFAULT_TARGET_TRIPLE="arm-unknown-linux-gnueabihf" -DLLVM_HOST_TRIPLE="arm-unknown-linux-gnueabihf" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake --build build --config Release --parallel 4 --target install
+      - name: Compress runtimes for armhf
+        run: tar -czf runtimes_linux_armhf.tar.gz runtimes
+      - name: Upload runtimes for armhf
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" runtimes_linux_armhf.tar.gz --clobber
+          rm runtimes_linux_armhf.tar.gz
+
+  llvm_linux_armel:
+    name: LLVM for Linux armel
+    needs: [create_release, create_llvm_x64_release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set release name
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+      - name: Install build tools for x64
+        run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
+      - name: Install build tools for armel
+        run: sudo apt install --yes binutils-arm-linux-gnueabi cpp-14-arm-linux-gnueabi g++-14-arm-linux-gnueabi gcc-14-arm-linux-gnueabi libc6-dev-armel-cross libc6-armel-cross libgcc-14-dev-armel-cross libstdc++6-armel-cross libstdc++-14-dev-armel-cross libstdc++-14-pic-armel-cross linux-libc-dev-armel-cross
+      - name: Download LLVM source
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
+          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          tar -xzf llvm_linux_x64.tar.xz
+          mv llvm llvm_build_x64
+          mkdir llvm
+          mkdir runtimes
+
+      - name: Build LLVM for armel
+        working-directory: llvm-project/llvm
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/armel.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="arm-unknown-linux-gnueabi" -DLLVM_HOST_TRIPLE="arm-unknown-linux-gnueabi" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake --build build --config Release --target install
+      - name: Compress LLVM for armel
+        run: tar -czf llvm_linux_armel.tar.gz llvm
+      - name: Upload LLVM for armel
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" llvm_linux_armel.tar.gz --clobber
+          rm llvm_linux_armel.tar.gz
+      - name: Build runtimes for armel
+        working-directory: llvm-project/runtimes
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/armel_clang.cmake" -DLLVM_RUNTIME_TARGETS="arm-unknown-linux-gnueabi" -DLLVM_DEFAULT_TARGET_TRIPLE="arm-unknown-linux-gnueabi" -DLLVM_HOST_TRIPLE="arm-unknown-linux-gnueabi" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake --build build --config Release --parallel 4 --target install
+      - name: Compress runtimes for armel
+        run: tar -czf runtimes_linux_armel.tar.gz runtimes
+      - name: Upload runtimes for armel
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" runtimes_linux_armel.tar.gz --clobber
+          rm runtimes_linux_armel.tar.gz
+
