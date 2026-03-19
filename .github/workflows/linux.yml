@@ -25,11 +25,9 @@ jobs:
       - name: Create release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
-          gh release create "$RELEASE_NAME" --title "llvm ${{ inputs.llvmVersion }}, boost ${{ inputs.boostVersion }}, icu4c ${{ inputs.icuVersion }}" --notes "Release notes are updated manually, so it is work in progress" --draft
+        run: gh release create llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }} --title "llvm ${{ inputs.llvmVersion }}, boost ${{ inputs.boostVersion }}, icu4c ${{ inputs.icuVersion }}" --notes "Release notes are updated manually, so it is work in progress" --draft
   create_llvm_x64_release:
-    name: Create release
+    name: Create release for LLVM x64
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,7 +35,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "llvm${{ inputs.llvmVersion }}" --title "llvm ${{ inputs.llvmVersion }}" --notes "LLVM ${{ inputs.llvmVersion }}"
+          gh release create llvm${{ inputs.llvmVersion }} --title "llvm ${{ inputs.llvmVersion }}" --notes "LLVM ${{ inputs.llvmVersion }}"
 
   icu4c_linux:
     name: icu4c for Linux
