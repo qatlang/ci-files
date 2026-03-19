@@ -254,7 +254,7 @@ jobs:
 
       - name: Building for x64
         working-directory: boost-project
-        run: ./b2 install toolset=clang-x64 --prefix="$GITHUB_WORKSPACE/boost"
+        run: ./b2 install toolset=clang-x64 --with-json --with-filesystem --with-process --prefix="$GITHUB_WORKSPACE/boost"
       - name: Compress build for x64
         run: tar -czf boost_linux_x64.tar.gz boost
       - name: Upload build for x64
@@ -268,7 +268,7 @@ jobs:
 
       - name: Building for i686
         working-directory: boost-project
-        run: ./b2 install toolset=clang-i686 --prefix="$GITHUB_WORKSPACE/boost"
+        run: ./b2 install toolset=clang-i686 --with-json --with-filesystem --with-process --prefix="$GITHUB_WORKSPACE/boost"
       - name: Compress build for i686
         run: tar -czf boost_linux_i686.tar.gz boost
       - name: Upload build for i686
@@ -282,7 +282,7 @@ jobs:
 
       - name: Building for arm64
         working-directory: boost-project
-        run: ./b2 install toolset=clang-arm64 --prefix="$GITHUB_WORKSPACE/boost"
+        run: ./b2 install toolset=clang-arm64 --with-json --with-filesystem --with-process --prefix="$GITHUB_WORKSPACE/boost"
       - name: Compress build for arm64
         run: tar -czf boost_linux_arm64.tar.gz boost
       - name: Upload build for arm64
@@ -296,7 +296,7 @@ jobs:
 
       - name: Building for riscv64
         working-directory: boost-project
-        run: ./b2 install toolset=clang-riscv64 --prefix="$GITHUB_WORKSPACE/boost"
+        run: ./b2 install toolset=clang-riscv64 --with-json --with-filesystem --with-process --prefix="$GITHUB_WORKSPACE/boost"
       - name: Compress build for riscv64
         run: tar -czf boost_linux_riscv64.tar.gz boost
       - name: Upload build for riscv64
@@ -310,7 +310,7 @@ jobs:
 
       - name: Building for s390x
         working-directory: boost-project
-        run: ./b2 install toolset=clang-s390x --prefix="$GITHUB_WORKSPACE/boost"
+        run: ./b2 install toolset=clang-s390x --with-json --with-filesystem --with-process --prefix="$GITHUB_WORKSPACE/boost"
       - name: Compress build for s390x
         run: tar -czf boost_linux_s390x.tar.gz boost
       - name: Upload build for s390x
@@ -324,7 +324,7 @@ jobs:
 
       - name: Building for powerpc64le
         working-directory: boost-project
-        run: ./b2 install toolset=clang-powerpc64le --prefix="$GITHUB_WORKSPACE/boost"
+        run: ./b2 install toolset=clang-powerpc64le --with-json --with-filesystem --with-process --prefix="$GITHUB_WORKSPACE/boost"
       - name: Compress build for powerpc64le
         run: tar -czf boost_linux_ppc64le.tar.gz boost
       - name: Upload build for powerpc64le
@@ -338,7 +338,7 @@ jobs:
 
       - name: Building for powerpc64
         working-directory: boost-project
-        run: ./b2 install toolset=clang-powerpc64 --prefix="$GITHUB_WORKSPACE/boost"
+        run: ./b2 install toolset=clang-powerpc64 --with-json --with-filesystem --with-process --prefix="$GITHUB_WORKSPACE/boost"
       - name: Compress build for powerpc64
         run: tar -czf boost_linux_ppc64.tar.gz boost
       - name: Upload build for powerpc64
@@ -352,7 +352,7 @@ jobs:
 
       - name: Building for armhf
         working-directory: boost-project
-        run: ./b2 install toolset=gcc-armhf --prefix="$GITHUB_WORKSPACE/boost"
+        run: ./b2 install toolset=gcc-armhf --with-json --with-filesystem --with-process --prefix="$GITHUB_WORKSPACE/boost"
       - name: Compress build for armhf
         run: tar -czf boost_linux_armhf.tar.gz boost
       - name: Upload build for armhf
@@ -366,7 +366,7 @@ jobs:
 
       - name: Building for armel
         working-directory: boost-project
-        run: ./b2 install toolset=gcc-armel --prefix="$GITHUB_WORKSPACE/boost"
+        run: ./b2 install toolset=gcc-armel --with-json --with-filesystem --with-process --prefix="$GITHUB_WORKSPACE/boost"
       - name: Compress build for armel
         run: tar -czf boost_linux_armel.tar.gz boost
       - name: Upload build for armel
