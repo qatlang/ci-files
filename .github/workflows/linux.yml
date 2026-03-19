@@ -51,9 +51,9 @@ jobs:
       - name: Install build tools for i686
         run: sudo apt install --yes binutils-i686-linux-gnu cpp-14-i686-linux-gnu g++-14-i686-linux-gnu gcc-14-i686-linux-gnu libc6-dev-i386-cross libc6-i386-cross libgcc-14-dev-i386-cross libstdc++6-i386-cross libx32stdc++-14-dev-i386-cross libstdc++-14-dev-i386-cross libstdc++-14-pic-i386-cross linux-libc-dev-i386-cross
       - name: Install build tools for arm64
-        run: sudo apt install --yes install binutils-aarch64-linux-gnu cpp-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu gcc-14-aarch64-linux-gnu libc6-dev-arm64-cross libc6-arm64-cross libgcc-14-dev-arm64-cross libstdc++6-arm64-cross libstdc++-14-dev-arm64-cross linux-libc-dev-arm64-cross
+        run: sudo apt install --yes binutils-aarch64-linux-gnu cpp-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu gcc-14-aarch64-linux-gnu libc6-dev-arm64-cross libc6-arm64-cross libgcc-14-dev-arm64-cross libstdc++6-arm64-cross libstdc++-14-dev-arm64-cross linux-libc-dev-arm64-cross
       - name: Install build tools for riscv64
-        run: sudo apt install --yes install binutils-riscv64-linux-gnu cpp-14-riscv64-linux-gnu g++-14-riscv64-linux-gnu gcc-14-riscv64-linux-gnu gcc-riscv64-unknown-elf libc6-dev-riscv64-cross libc6-riscv64-cross libgcc-14-dev-riscv64-cross libstdc++6-riscv64-cross libstdc++-14-dev-riscv64-cross libstdc++-14-pic-riscv64-cross linux-libc-dev-riscv64-cross
+        run: sudo apt install --yes binutils-riscv64-linux-gnu cpp-14-riscv64-linux-gnu g++-14-riscv64-linux-gnu gcc-14-riscv64-linux-gnu gcc-riscv64-unknown-elf libc6-dev-riscv64-cross libc6-riscv64-cross libgcc-14-dev-riscv64-cross libstdc++6-riscv64-cross libstdc++-14-dev-riscv64-cross libstdc++-14-pic-riscv64-cross linux-libc-dev-riscv64-cross
       - name: Install build tools for powerpc64le
         run: sudo apt install --yes binutils-powerpc64le-linux-gnu cpp-14-powerpc64le-linux-gnu g++-14-powerpc64le-linux-gnu gcc-14-powerpc64le-linux-gnu libc6-dev-ppc64el-cross libc6-ppc64el-cross libgcc-14-dev-ppc64el-cross libstdc++6-ppc64el-cross libstdc++-14-dev-ppc64el-cross libstdc++-14-pic-ppc64el-cross linux-libc-dev-ppc64el-cross
       - name: Install build tools for powerpc64
@@ -227,9 +227,9 @@ jobs:
       - name: Install build tools for i686
         run: sudo apt install --yes binutils-i686-linux-gnu cpp-14-i686-linux-gnu g++-14-i686-linux-gnu gcc-14-i686-linux-gnu libc6-dev-i386-cross libc6-i386-cross libgcc-14-dev-i386-cross libstdc++6-i386-cross libx32stdc++-14-dev-i386-cross libstdc++-14-dev-i386-cross libstdc++-14-pic-i386-cross linux-libc-dev-i386-cross
       - name: Install build tools for arm64
-        run: sudo apt install --yes install binutils-aarch64-linux-gnu cpp-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu gcc-14-aarch64-linux-gnu libc6-dev-arm64-cross libc6-arm64-cross libgcc-14-dev-arm64-cross libstdc++6-arm64-cross libstdc++-14-dev-arm64-cross linux-libc-dev-arm64-cross
+        run: sudo apt install --yes binutils-aarch64-linux-gnu cpp-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu gcc-14-aarch64-linux-gnu libc6-dev-arm64-cross libc6-arm64-cross libgcc-14-dev-arm64-cross libstdc++6-arm64-cross libstdc++-14-dev-arm64-cross linux-libc-dev-arm64-cross
       - name: Install build tools for riscv64
-        run: sudo apt install --yes install binutils-riscv64-linux-gnu cpp-14-riscv64-linux-gnu g++-14-riscv64-linux-gnu gcc-14-riscv64-linux-gnu gcc-riscv64-unknown-elf libc6-dev-riscv64-cross libc6-riscv64-cross libgcc-14-dev-riscv64-cross libstdc++6-riscv64-cross libstdc++-14-dev-riscv64-cross libstdc++-14-pic-riscv64-cross linux-libc-dev-riscv64-cross
+        run: sudo apt install --yes binutils-riscv64-linux-gnu cpp-14-riscv64-linux-gnu g++-14-riscv64-linux-gnu gcc-14-riscv64-linux-gnu gcc-riscv64-unknown-elf libc6-dev-riscv64-cross libc6-riscv64-cross libgcc-14-dev-riscv64-cross libstdc++6-riscv64-cross libstdc++-14-dev-riscv64-cross libstdc++-14-pic-riscv64-cross linux-libc-dev-riscv64-cross
       - name: Install build tools for powerpc64le
         run: sudo apt install --yes binutils-powerpc64le-linux-gnu cpp-14-powerpc64le-linux-gnu g++-14-powerpc64le-linux-gnu gcc-14-powerpc64le-linux-gnu libc6-dev-ppc64el-cross libc6-ppc64el-cross libgcc-14-dev-ppc64el-cross libstdc++6-ppc64el-cross libstdc++-14-dev-ppc64el-cross libstdc++-14-pic-ppc64el-cross linux-libc-dev-ppc64el-cross
       - name: Install build tools for powerpc64
@@ -379,7 +379,7 @@ jobs:
           rm -rf boost_linux_armel.tar.gz
 
   llvm_linux_x64:
-    name: LLVM for Linux
+    name: LLVM for Linux x64
     needs: [create_release, create_llvm_x64_release]
     runs-on: ubuntu-24.04
     steps:
@@ -426,8 +426,8 @@ jobs:
           rm runtimes_linux_x64.tar.gz
 
   llvm_linux_i686:
-    name: LLVM for Linux
-    needs: [create_release, create_llvm_x64_release]
+    name: LLVM for Linux i686
+    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -478,7 +478,7 @@ jobs:
 
   llvm_linux_arm64:
     name: LLVM for Linux arm64
-    needs: [create_release, create_llvm_x64_release]
+    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -488,7 +488,7 @@ jobs:
       - name: Install build tools for x64
         run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
       - name: Install build tools for arm64
-        run: sudo apt install --yes install binutils-aarch64-linux-gnu cpp-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu gcc-14-aarch64-linux-gnu libc6-dev-arm64-cross libc6-arm64-cross libgcc-14-dev-arm64-cross libstdc++6-arm64-cross libstdc++-14-dev-arm64-cross linux-libc-dev-arm64-cross
+        run: sudo apt install --yes binutils-aarch64-linux-gnu cpp-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu gcc-14-aarch64-linux-gnu libc6-dev-arm64-cross libc6-arm64-cross libgcc-14-dev-arm64-cross libstdc++6-arm64-cross libstdc++-14-dev-arm64-cross linux-libc-dev-arm64-cross
       - name: Download LLVM source
         run: |
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
@@ -529,7 +529,7 @@ jobs:
 
   llvm_linux_riscv64:
     name: LLVM for Linux riscv64
-    needs: [create_release, create_llvm_x64_release]
+    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -539,7 +539,7 @@ jobs:
       - name: Install build tools for x64
         run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
       - name: Install build tools for riscv64
-        run: sudo apt install --yes install binutils-riscv64-linux-gnu cpp-14-riscv64-linux-gnu g++-14-riscv64-linux-gnu gcc-14-riscv64-linux-gnu gcc-riscv64-unknown-elf libc6-dev-riscv64-cross libc6-riscv64-cross libgcc-14-dev-riscv64-cross libstdc++6-riscv64-cross libstdc++-14-dev-riscv64-cross libstdc++-14-pic-riscv64-cross linux-libc-dev-riscv64-cross
+        run: sudo apt install --yes binutils-riscv64-linux-gnu cpp-14-riscv64-linux-gnu g++-14-riscv64-linux-gnu gcc-14-riscv64-linux-gnu gcc-riscv64-unknown-elf libc6-dev-riscv64-cross libc6-riscv64-cross libgcc-14-dev-riscv64-cross libstdc++6-riscv64-cross libstdc++-14-dev-riscv64-cross libstdc++-14-pic-riscv64-cross linux-libc-dev-riscv64-cross
       - name: Download LLVM source
         run: |
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
@@ -580,7 +580,7 @@ jobs:
 
   llvm_linux_ppc64le:
     name: LLVM for Linux powerpc64le
-    needs: [create_release, create_llvm_x64_release]
+    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -631,7 +631,7 @@ jobs:
 
   llvm_linux_powerpc64:
     name: LLVM for Linux powerpc64
-    needs: [create_release, create_llvm_x64_release]
+    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -682,7 +682,7 @@ jobs:
 
   llvm_linux_s390x:
     name: LLVM for Linux s390x
-    needs: [create_release, create_llvm_x64_release]
+    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -733,7 +733,7 @@ jobs:
 
   llvm_linux_armhf:
     name: LLVM for Linux armhf
-    needs: [create_release, create_llvm_x64_release]
+    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -784,7 +784,7 @@ jobs:
 
   llvm_linux_armel:
     name: LLVM for Linux armel
-    needs: [create_release, create_llvm_x64_release]
+    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
