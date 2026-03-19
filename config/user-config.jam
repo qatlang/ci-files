@@ -1,0 +1,81 @@
+using clang : x64 : clang++-20 :
+	<cflags>"-std=c11"
+	<cxxflags>"-std=c++23" ;
+
+using clang : powerpc64le : clang++-20 :
+	<variant>release
+	<link>static
+	<threading>multi
+	<architecture>power
+	<address-model>64
+	<compileflags>"--target=powerpc64le-linux-gnu"
+	<linkflags>"--target=powerpc64le-linux-gnu"
+	<cxxflags>"-std=c++23"
+	<cflags>"-std=c11" ;
+
+using clang : powerpc64 : clang++-20 :
+	<variant>release <link>static <threading>multi
+	<architecture>power <address-model>64
+	<compileflags>"--target=powerpc64-linux-gnu"
+	<linkflags>"--target=powerpc64-linux-gnu"
+	<cxxflags>"-std=c++23"
+	<cflags>"-std=c11" ;
+
+using clang : i686 : clang++-20 :
+	<variant>release <link>static <threading>multi
+	<architecture>x86 <address-model>32
+	<compileflags>"--target=i686-linux-gnu"
+	<linkflags>"--target=i686-linux-gnu"
+	<cxxflags>"-std=c++23"
+	<cflags>"-std=c11" ;
+
+using clang : s390x : clang++-20 :
+	<variant>release <link>static <threading>multi
+	<architecture>s390x <address-model>64
+	<compileflags>"--target=s390x-linux-gnu"
+	<linkflags>"--target=s390x-linux-gnu"
+	<cxxflags>"-std=c++23"
+	<cflags>"-std=c11" ;
+
+using clang : arm64 : clang++-20 :
+        <variant>release <link>static <threading>multi
+        <architecture>arm <address-model>64
+        <cxxflags>"-std=c++23"
+        <cflags>"-std=c11"
+	<archiver>"aarch64-linux-gnu-ar"
+	<nm>"aarch64-linux-gnu-nm"
+	<strip>"aarch64-linux-gnu-strip"
+	<ranlib>"aarch64-linux-gnu-ranlib"
+	<objdump>"aarch64-linux-gnu-objdump" ;
+
+using clang : riscv64 : clang++-20 :
+        <variant>release <link>static <threading>multi
+        <architecture>riscv <address-model>64
+        <cxxflags>"-std=c++23"
+        <cflags>"-std=c11"
+	<archiver>"riscv64-linux-gnu-ar"
+	<nm>"riscv64-linux-gnu-nm"
+	<strip>"riscv64-linux-gnu-strip"
+	<ranlib>"riscv64-linux-gnu-ranlib"
+	<objdump>"riscv64-linux-gnu-objdump" ;
+
+using gcc : armhf : arm-linux-gnueabihf-g++-14 :
+	<variant>release <link>static <threading>multi
+	<architecture>arm <address-model>32
+	<cxxflags>"-std=c++23"
+	<cflags>"-std=c11"
+	<archiver>"arm-linux-gnueabihf-ar"
+	<nm>"arm-linux-gnueabihf-nm"
+	<strip>"arm-linux-gnueabihf-strip"
+	<ranlib>"arm-linux-gnueabihf-ranlib"
+	<objdump>"arm-linux-gnueabihf-objdump" ;
+
+using gcc : armel : arm-linux-gnueabi-g++-14 :
+	<variant>release <link>static <threading>multi
+	<architecture>arm <address-model>32
+	<cxxflags>"-std=c++23" <cflags>"-std=c11"
+	<archiver>"arm-linux-gnueabi-ar"
+	<nm>"arm-linux-gnueabi-nm"
+	<strip>"arm-linux-gnueabi-strip"
+	<ranlib>"arm-linux-gnueabi-ranlib"
+	<objdump>"arm-linux-gnueabi-objdump" ;
