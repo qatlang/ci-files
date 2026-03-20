@@ -857,7 +857,7 @@ jobs:
       - name: Building for arm64
         working-directory: build_arm64
         run: |
-          CFLAGS="-std=c11 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" CXXFLAGS="-std=c++23 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" ../icu/source/configure --prefix="$GITHUB_WORKSPACE/icu4c" --enable-static --disable-shared
+          CFLAGS="-std=c11 -arch arm64 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" CXXFLAGS="-std=c++23 -arch arm64 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" ../icu/source/configure --prefix="$GITHUB_WORKSPACE/icu4c" --enable-static --disable-shared
           make -j4
           make install
       - name: Compress build for arm64
@@ -870,7 +870,7 @@ jobs:
       - name: Building for x64
         working-directory: build_x64
         run: |
-          CFLAGS="-std=c11 -target x86_64-apple-darwin -isysroot $SDK_PATH" CXXFLAGS="-std=c++23 -target x86_64-apple-darwin -isysroot $SDK_PATH" ../icu/source/configure --prefix="$GITHUB_WORKSPACE/icu4c" --host="x86_64-apple-darwin" --build="arm64-apple-macos11" --enable-static --disable-shared --with-cross-build="$GITHUB_WORKSPACE/build_arm64"
+          CFLAGS="-std=c11 -arch x86_64 -target x86_64-apple-darwin -isysroot $SDK_PATH" CXXFLAGS="-std=c++23 -arch x86_64 -target x86_64-apple-darwin -isysroot $SDK_PATH" ../icu/source/configure --prefix="$GITHUB_WORKSPACE/icu4c" --host="x86_64-apple-darwin" --build="arm64-apple-macos11" --enable-static --disable-shared --with-cross-build="$GITHUB_WORKSPACE/build_arm64"
           make -j4
           make install
       - name: Compress build for x64
