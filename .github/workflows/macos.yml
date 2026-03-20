@@ -1,40 +1,75 @@
-name: Build qat dependencies
+name: MacOS
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      llvmVersion:
+        required: true
+        default: "22.1.1"
+        type: string
+      boostVersion:
+        required: true
+        default: "1.90.0"
+        type: string
+      icuVersion:
+        required: true
+        default: "78.3"
+        type: string
 
 jobs:
-
-  macos_arm64_icu4c:
-    name: icu4c for macos_arm64
-    runs-on: macos-latest
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }} --title "llvm ${{ inputs.llvmVersion }}, boost ${{ inputs.boostVersion }}, icu4c ${{ inputs.icuVersion }}" --notes "Release notes are updated manually, so it is work in progress" --draft
+
+  macos_icu4c:
+    name: icu4c for macos_arm64
+    runs-on: macos-latest
+    needs: [create_release]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set release name
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GTIHUB_ENV"
       - name: Create directories
         run: |
           mkdir icu4c
-          mkdir icu4c/arm64
-          mkdir libs
-          mkdir libs/icu4c
-        
+          mkdir build_arm64
+          mkdir build_x64
       - name: Download icu4c source
-        working-directory: ./icu4c
         run: |
-          wget https://github.com/unicode-org/icu/releases/download/release-77-1/icu4c-77_1-src.tgz
-          tar -xzf icu4c-77_1-src.tgz
+          wget https://github.com/unicode-org/icu/releases/download/release-${{ inputs.icuVersion }}/icu4c-${{ inputs.icuVersion }}-sources.tgz
+          tar -xzf icu4c-${{ inputs.icuVersion }}-sources.tgz
 
-      - name: Build icu4c
-        working-directory: ./icu4c/arm64
+      - name: Getting SDK Path
+        run: echo "SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)" >> "$GITHUB_ENV"
+      - name: Building for arm64
+        working-directory: build_arm64
         run: |
-          ../icu/source/configure --prefix="${{ github.workspace }}/libs/icu4c" --enable-static --disable-shared CFLAGS="-std=c11" CXXFLAGS="-std=c++20"
-          make -j8
-          sudo make install
-
-      - name: Package icu4c
-        working-directory: ./libs
+          CFLAGS="-std=c11 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" CXXFLAGS="-std=c++23 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" ../icu/source/configure --prefix="$GITHUB_WORKSPACE/icu4c" --enable-static --disable-shared
+          make -j4
+          make install
+      - name: Compress build for arm64
         run: tar -cvzf icu4c_macos_arm64.tar.gz icu4c
+      - name: Uploading build for arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" icu4c_macos_arm64.tar.gz
 
-      - name: Upload icu4c
-        uses: actions/upload-artifact@v4
-        with:
-          name: icu4c_macos_arm64
-          path: ${{ github.workspace }}/libs/icu4c_macos_arm64.tar.gz
+      - name: Building for x64
+        working-directory: build_x64
+        run: |
+          CFLAGS="-std=c11 -target x86_64-apple-darwin -isysroot $SDK_PATH" CXXFLAGS="-std=c++23 -target x86_64-apple-darwin -isysroot $SDK_PATH" ../icu/source/configure --prefix="$GITHUB_WORKSPACE/icu4c" --host="x86_64-apple-darwin" --build="arm64-apple-macos11" --enable-static --disable-shared --with-cross-build="$GITHUB_WORKSPACE/build_arm64"
+          make -j4
+          make install
+      - name: Compress build for x64
+        run: tar -cvzf icu4c_macos_x64.tar.gz icu4c
+      - name: Uploading build for x64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" icu4c_macos_x64.tar.gz
+

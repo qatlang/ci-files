@@ -1,4 +1,4 @@
-name: Linux (x64, i686, arm64, riscv64, powerpc64le, powerpc64, s390x, armhf, armel)
+name: Linux
 
 on:
   workflow_dispatch:
