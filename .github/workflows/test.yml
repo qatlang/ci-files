@@ -60,7 +60,7 @@ jobs:
           rm -rf boost/*
       - name: Building for x64
         working-directory: boost-project
-        run: ./b2 toolset=clang architecture=arm address-model=64 variant=release threading=multi link=static cxxflags="-std=c++23 -target x86_64-apple-macos11 -isysroot $SDK_PATH" --prefix="$GITHUB_WORKSPACE/boost" install
+        run: ./b2 toolset=clang architecture=x86 address-model=64 variant=release threading=multi link=static cxxflags="-std=c++23 -target x86_64-apple-darwin -isysroot $SDK_PATH" --prefix="$GITHUB_WORKSPACE/boost" install
       - name: Compressing build for x64
         run: tar -czf boost_macos_x64.tar.gz boost
       - name: Uploading build for x64
