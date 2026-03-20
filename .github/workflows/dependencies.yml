@@ -900,6 +900,7 @@ jobs:
         run: ./bootstrap.sh
       - name: Get SDK path
         run: echo "SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)" >> "$GITHUB_ENV"
+
       - name: Building for arm64
         working-directory: boost-project
         run: ./b2 toolset=clang architecture=arm address-model=64 variant=release threading=multi link=static cxxflags="-std=c++23 -arch arm64 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" --prefix="$GITHUB_WORKSPACE/boost" --with-filesystem --with-json --with-process install
@@ -911,6 +912,7 @@ jobs:
         run: |
           gh release upload "$RELEASE_NAME" boost_macos_arm64.tar.gz --clobber
           rm -rf boost/*
+
       - name: Building for x64
         working-directory: boost-project
         run: ./b2 toolset=clang architecture=x86 address-model=64 variant=release threading=multi link=static cxxflags="-std=c++23 -arch x86_64 -target x86_64-apple-darwin -isysroot $SDK_PATH" --prefix="$GITHUB_WORKSPACE/boost" --with-filesystem --with-json --with-process install

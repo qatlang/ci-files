@@ -27,45 +27,50 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }} --title "llvm ${{ inputs.llvmVersion }}, boost ${{ inputs.boostVersion }}, icu4c ${{ inputs.icuVersion }}" --notes "Release notes are updated manually, so it is work in progress" --draft
 
-  macos_icu4c:
-    name: Boost for macOS
-    runs-on: macos-latest
+  llvm_macos:
+    name: LLVM for macOS (arm64, x64)
     needs: [create_release]
+    runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Set release name
         run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
-      - name: Download boost source
+      - name: Download LLVM source
         run: |
-          wget https://github.com/boostorg/boost/releases/download/boost-${{ inputs.boostVersion }}/boost-${{ inputs.boostVersion }}-b2-nodocs.tar.gz
-          tar -xzf boost-${{ inputs.boostVersion }}-b2-nodocs.tar.gz
-          mv boost-${{ inputs.boostVersion }} boost-project
-          mkdir boost
-      - name: Building b2
-        working-directory: boost-project
-        run: ./bootstrap.sh
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
+          mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
+          mkdir llvm
       - name: Get SDK path
         run: echo "SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)" >> "$GITHUB_ENV"
-      - name: Building for arm64
-        working-directory: boost-project
-        run: ./b2 toolset=clang architecture=arm address-model=64 variant=release threading=multi link=static cxxflags="-std=c++23 -arch arm64 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" --prefix="$GITHUB_WORKSPACE/boost" --with-filesystem --with-json --with-process install
+
+      - name: Building LLVM for arm64
+        working-directory: llvm-project/llvm
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_C_COMPILER="clang" -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="11.0" -DCMAKE_CXX_STANDARD=23 -DCMAKE_CXX_FLAGS="-target arm64-apple-macos11" -DLLVM_DEFAULT_TARGET_TRIPLE="arm64-apple-darwin" -DLLVM_HOST_TRIPLE="arm64-apple-darwin" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_USE_LLD=ON -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake --build build --config Release --target install
       - name: Compressing build for arm64
-        run: tar -czf boost_macos_arm64.tar.gz boost
+        run: tar -czf llvm_macos_arm64.tar.gz llvm
       - name: Uploading build for arm64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload "$RELEASE_NAME" boost_macos_arm64.tar.gz --clobber
-          rm -rf boost/*
-      - name: Building for x64
-        working-directory: boost-project
-        run: ./b2 toolset=clang architecture=x86 address-model=64 variant=release threading=multi link=static cxxflags="-std=c++23 -arch x86_64 -target x86_64-apple-darwin -isysroot $SDK_PATH" --prefix="$GITHUB_WORKSPACE/boost" --with-filesystem --with-json --with-process install
+          gh release upload "$RELEASE_NAME" llvm_macos_arm64.tar.gz --clobber
+          mv llvm llvm_build_arm64
+          mkdir llvm
+
+      - name: Building LLVM for x64
+        working-directory: llvm-project/llvm
+        run: |
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_C_COMPILER="clang" -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_CXX_STANDARD=23 -DCMAKE_CXX_FLAGS="-target x86_64-apple-darwin" -DLLVM_DEFAULT_TARGET_TRIPLE="x86_64-apple-darwin" -DLLVM_HOST_TRIPLE="x86_64-apple-darwin" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_arm64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_arm64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_USE_LLD=ON -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake --build build --config Release --target install
       - name: Compressing build for x64
-        run: tar -czf boost_macos_x64.tar.gz boost
+        run: tar -czf llvm_macos_x64.tar.gz llvm
       - name: Uploading build for x64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload "$RELEASE_NAME" boost_macos_x64.tar.gz --clobber
+          gh release upload "$RELEASE_NAME" llvm_macos_x64.tar.gz --clobber
+          rm -rf llvm/*
 
