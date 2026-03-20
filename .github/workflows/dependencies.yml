@@ -1,4 +1,4 @@
-name: Linux
+name: Dependencies of qat
 
 on:
   workflow_dispatch:
@@ -832,4 +832,51 @@ jobs:
         run: |
           gh release upload "$RELEASE_NAME" runtimes_linux_armel.tar.gz --clobber
           rm runtimes_linux_armel.tar.gz
+
+  macos_icu4c:
+    name: icu4c for macOS (arm64, x64)
+    runs-on: macos-latest
+    needs: [create_release]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set release name
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+      - name: Create directories
+        run: |
+          mkdir icu4c
+          mkdir build_arm64
+          mkdir build_x64
+      - name: Download icu4c source
+        run: |
+          wget https://github.com/unicode-org/icu/releases/download/release-${{ inputs.icuVersion }}/icu4c-${{ inputs.icuVersion }}-sources.tgz
+          tar -xzf icu4c-${{ inputs.icuVersion }}-sources.tgz
+
+      - name: Getting SDK Path
+        run: echo "SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)" >> "$GITHUB_ENV"
+      - name: Building for arm64
+        working-directory: build_arm64
+        run: |
+          CFLAGS="-std=c11 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" CXXFLAGS="-std=c++23 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" ../icu/source/configure --prefix="$GITHUB_WORKSPACE/icu4c" --enable-static --disable-shared
+          make -j4
+          make install
+      - name: Compress build for arm64
+        run: tar -cvzf icu4c_macos_arm64.tar.gz icu4c
+      - name: Uploading build for arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" icu4c_macos_arm64.tar.gz --clobber
+
+      - name: Building for x64
+        working-directory: build_x64
+        run: |
+          CFLAGS="-std=c11 -target x86_64-apple-darwin -isysroot $SDK_PATH" CXXFLAGS="-std=c++23 -target x86_64-apple-darwin -isysroot $SDK_PATH" ../icu/source/configure --prefix="$GITHUB_WORKSPACE/icu4c" --host="x86_64-apple-darwin" --build="arm64-apple-macos11" --enable-static --disable-shared --with-cross-build="$GITHUB_WORKSPACE/build_arm64"
+          make -j4
+          make install
+      - name: Compress build for x64
+        run: tar -cvzf icu4c_macos_x64.tar.gz icu4c
+      - name: Uploading build for x64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" icu4c_macos_x64.tar.gz --clobber
 
