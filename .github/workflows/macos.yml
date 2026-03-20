@@ -32,9 +32,8 @@ jobs:
     runs-on: macos-latest
     needs: [create_release]
     steps:
-      - uses: actions/checkout@v4
       - name: Set release name
-        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GTIHUB_ENV"
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
       - name: Create directories
         run: |
           mkdir icu4c
