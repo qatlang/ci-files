@@ -400,7 +400,7 @@ jobs:
       - name: Build LLVM for x64
         working-directory: llvm-project/llvm
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_C_COMPILER="clang-20" -DCMAKE_CXX_COMPILER="clang++-20" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLLVM_ENABLE_RUNTIMES="compiler-rt;libcxxabi;libunwind" -DLLVM_RUNTIME_TARGETS="x86_64-unknown-linux-gnu" -DCOMPILER_RT_BUILD_BUILTINS=ON -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_USE_LLD=ON -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_C_COMPILER="clang-20" -DCMAKE_CXX_COMPILER="clang++-20" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_USE_LLD=ON -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBPFM=OFF
           cmake --build build --config Release --target install
       - name: Compress LLVM for x64
         run: tar -czf llvm_linux_x64.tar.gz llvm
@@ -879,4 +879,46 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload "$RELEASE_NAME" icu4c_macos_x64.tar.gz --clobber
+
+  macos_boost:
+    name: Boost for macOS (arm64, x64)
+    runs-on: macos-latest
+    needs: [create_release]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set release name
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+      - name: Download boost source
+        run: |
+          wget https://github.com/boostorg/boost/releases/download/boost-${{ inputs.boostVersion }}/boost-${{ inputs.boostVersion }}-b2-nodocs.tar.gz
+          tar -xzf boost-${{ inputs.boostVersion }}-b2-nodocs.tar.gz
+          mv boost-${{ inputs.boostVersion }} boost-project
+          mkdir boost
+      - name: Building b2
+        working-directory: boost-project
+        run: ./bootstrap.sh
+      - name: Get SDK path
+        run: echo "SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)" >> "$GITHUB_ENV"
+      - name: Building for arm64
+        working-directory: boost-project
+        run: ./b2 toolset=clang architecture=arm address-model=64 variant=release threading=multi link=static cxxflags="-std=c++23 -arch arm64 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" --prefix="$GITHUB_WORKSPACE/boost" --with-filesystem --with-json --with-process install
+      - name: Compressing build for arm64
+        run: tar -czf boost_macos_arm64.tar.gz boost
+      - name: Uploading build for arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" boost_macos_arm64.tar.gz --clobber
+          rm -rf boost/*
+      - name: Building for x64
+        working-directory: boost-project
+        run: ./b2 toolset=clang architecture=x86 address-model=64 variant=release threading=multi link=static cxxflags="-std=c++23 -arch x86_64 -target x86_64-apple-darwin -isysroot $SDK_PATH" --prefix="$GITHUB_WORKSPACE/boost" --with-filesystem --with-json --with-process install
+      - name: Compressing build for x64
+        run: tar -czf boost_macos_x64.tar.gz boost
+      - name: Uploading build for x64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" boost_macos_x64.tar.gz --clobber
 
