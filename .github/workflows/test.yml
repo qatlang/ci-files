@@ -1,0 +1,71 @@
+name: MacOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      llvmVersion:
+        required: true
+        default: "22.1.1"
+        type: string
+      boostVersion:
+        required: true
+        default: "1.90.0"
+        type: string
+      icuVersion:
+        required: true
+        default: "78.3"
+        type: string
+
+jobs:
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }} --title "llvm ${{ inputs.llvmVersion }}, boost ${{ inputs.boostVersion }}, icu4c ${{ inputs.icuVersion }}" --notes "Release notes are updated manually, so it is work in progress" --draft
+
+  macos_icu4c:
+    name: Boost for macOS
+    runs-on: macos-latest
+    needs: [create_release]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set release name
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+      - name: Download boost source
+        run: |
+          wget https://github.com/boostorg/boost/releases/download/boost-${{ inputs.boostVersion }}/boost-${{ inputs.boostVersion }}-b2-nodocs.tar.gz
+          tar -xzf boost-${{ inputs.boostVersion }}-b2-nodocs.tar.gz
+          mv boost-${{ inputs.boostVersion }} boost-project
+          mkdir boost
+      - name: Building b2
+        working-directory: boost-project
+        run: ./bootstrap.sh
+      - name: Get SDK path
+        run: echo "SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)" >> "$GITHUB_ENV"
+      - name: Building for arm64
+        working-directory: boost-project
+        run: ./b2 toolset=clang architecture=arm address-model=64 variant=release threading=multi link=static cxxflags="-std=c++23 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" --prefix="$GITHUB_WORKSPACE/boost" install
+      - name: Compressing build for arm64
+        run: tar -czf boost_macos_arm64.tar.gz boost
+      - name: Uploading build for arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" boost_macos_arm64.tar.gz --clobber
+          rm -rf boost/*
+      - name: Building for x64
+        working-directory: boost-project
+        run: ./b2 toolset=clang architecture=arm address-model=64 variant=release threading=multi link=static cxxflags="-std=c++23 -target x86_64-apple-macos11 -isysroot $SDK_PATH" --prefix="$GITHUB_WORKSPACE/boost" install
+      - name: Compressing build for x64
+        run: tar -czf boost_macos_x64.tar.gz boost
+      - name: Uploading build for x64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_NAME" boost_macos_x64.tar.gz --clobber
+
