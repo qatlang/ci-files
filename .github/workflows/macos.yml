@@ -32,6 +32,8 @@ jobs:
     runs-on: macos-latest
     needs: [create_release]
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Set release name
         run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
       - name: Create directories
@@ -57,7 +59,7 @@ jobs:
       - name: Uploading build for arm64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "$RELEASE_NAME" icu4c_macos_arm64.tar.gz
+        run: gh release upload "$RELEASE_NAME" icu4c_macos_arm64.tar.gz --clobber
 
       - name: Building for x64
         working-directory: build_x64
@@ -70,5 +72,5 @@ jobs:
       - name: Uploading build for x64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "$RELEASE_NAME" icu4c_macos_x64.tar.gz
+        run: gh release upload "$RELEASE_NAME" icu4c_macos_x64.tar.gz --clobber
 
