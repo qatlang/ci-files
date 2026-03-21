@@ -444,7 +444,7 @@ jobs:
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
           wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
-          tar -xzf llvm_linux_x64.tar.xz
+          tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
           mkdir runtimes
@@ -495,7 +495,7 @@ jobs:
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
           wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
-          tar -xzf llvm_linux_x64.tar.xz
+          tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
           mkdir runtimes
@@ -546,7 +546,7 @@ jobs:
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
           wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
-          tar -xzf llvm_linux_x64.tar.xz
+          tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
           mkdir runtimes
@@ -597,7 +597,7 @@ jobs:
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
           wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
-          tar -xzf llvm_linux_x64.tar.xz
+          tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
           mkdir runtimes
@@ -648,7 +648,7 @@ jobs:
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
           wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
-          tar -xzf llvm_linux_x64.tar.xz
+          tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
           mkdir runtimes
@@ -699,7 +699,7 @@ jobs:
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
           wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
-          tar -xzf llvm_linux_x64.tar.xz
+          tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
           mkdir runtimes
@@ -750,7 +750,7 @@ jobs:
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
           wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
-          tar -xzf llvm_linux_x64.tar.xz
+          tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
           mkdir runtimes
@@ -801,7 +801,7 @@ jobs:
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
           wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
-          tar -xzf llvm_linux_x64.tar.xz
+          tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
           mkdir runtimes
