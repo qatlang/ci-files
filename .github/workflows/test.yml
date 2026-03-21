@@ -37,9 +37,16 @@ jobs:
       - name: Set release name
         run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
       - name: Download LLVM source
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: "llvm/llvm-project"
+          tag: llvmorg-${{ inputs.llvmVersion }}
+          fileName: llvm-project-${{ inputs.llvmVersion }}.src
+          tarBall: true
+          extract: true
+      - name: Extract LLVM source
         shell: powershell
         run: |
-          Invoke-WebRequest https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           Rename-Item -Path llvm-project-${{ inputs.llvmVersion }}.src -NewName llvm-project
           New-Item -Path llvm
