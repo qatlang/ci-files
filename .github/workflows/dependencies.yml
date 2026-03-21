@@ -629,7 +629,7 @@ jobs:
           gh release upload "$RELEASE_NAME" runtimes_linux_ppc64le.tar.gz --clobber
           rm runtimes_linux_ppc64le.tar.gz
 
-  llvm_linux_powerpc64:
+  llvm_linux_ppc64:
     name: LLVM for Linux powerpc64
     needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
@@ -832,6 +832,28 @@ jobs:
         run: |
           gh release upload "$RELEASE_NAME" runtimes_linux_armel.tar.gz --clobber
           rm runtimes_linux_armel.tar.gz
+
+  delete_llvm_x64_release:
+    name: Delete dummy release for LLVM
+    needs:
+      [
+        llvm_linux_x64,
+        llvm_linux_arm64,
+        llvm_linux_i686,
+        llvm_linux_riscv64,
+        llvm_linux_s390x,
+        llvm_linux_ppc64le,
+        llvm_linux_ppc64,
+        llvm_linux_armhf,
+        llvm_linux_armel,
+      ]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Delete release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release delete "llvm${{ inputs.llvmVersion }}" --yes --cleanup-tag
 
   macos_icu4c:
     name: icu4c for macOS (arm64, x64)
