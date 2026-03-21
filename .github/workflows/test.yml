@@ -39,7 +39,7 @@ jobs:
       - name: Install Visual Studio Community
         run: |
           choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.Component.MSBuild --add Microsoft.VisualStudio.Component.VC.ATLMFC --add Microsoft.VisualStudio.Component.VC.ATL.ARM64 --add Microsoft.VisualStudio.Component.VC.MFC.ARM64" -y
-          choco install visualstudio3033-workload-vctools -y
+          choco install visualstudio2022-workload-vctools -y
       - name: Download LLVM source
         uses: robinraju/release-downloader@v1
         with:
