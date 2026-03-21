@@ -52,8 +52,6 @@ jobs:
         run: sudo apt install --yes binutils-s390x-linux-gnu cpp-14-s390x-linux-gnu g++-14-s390x-linux-gnu gcc-14-s390x-linux-gnu libc6-dev-s390x-cross libc6-s390x-cross libgcc-14-dev-s390x-cross libstdc++6-s390x-cross libstdc++-14-dev-s390x-cross libstdc++-14-pic-s390x-cross linux-libc-dev-s390x-cross
       - name: Install build tools for armhf
         run: sudo apt install --yes binutils-arm-linux-gnueabihf cpp-14-arm-linux-gnueabihf g++-14-arm-linux-gnueabihf gcc-14-arm-linux-gnueabihf libc6-dev-armhf-cross libc6-armhf-cross libgcc-14-dev-armhf-cross libstdc++6-armhf-cross libstdc++-14-dev-armhf-cross libstdc++-14-pic-armhf-cross linux-libc-dev-armhf-cross
-      - name: Install build tools for armel
-        run: sudo apt install --yes binutils-arm-linux-gnueabi cpp-14-arm-linux-gnueabi g++-14-arm-linux-gnueabi gcc-14-arm-linux-gnueabi libc6-dev-armel-cross libc6-armel-cross libgcc-14-dev-armel-cross libstdc++6-armel-cross libstdc++-14-dev-armel-cross libstdc++-14-pic-armel-cross linux-libc-dev-armel-cross
       - name: Download icu4c source
         run: |
           wget https://github.com/unicode-org/icu/releases/download/release-${{ inputs.icuVersion }}/icu4c-${{ inputs.icuVersion }}-sources.tgz
@@ -67,7 +65,6 @@ jobs:
           mkdir build_ppc64
           mkdir build_s390x
           mkdir build_armhf
-          mkdir build_armel
       - name: Building for x64
         working-directory: build_x64
         run: |
@@ -188,21 +185,6 @@ jobs:
       - name: Clean build directory
         run: rm -rf icu4c/*
 
-      - name: Building for armel
-        working-directory: build_armel
-        run: |
-          CC=clang-20 CXX=clang++-20 CFLAGS=" --target=arm-unknown-linux-gnueabi" CXXFLAGS=" --target=arm-unknown-linux-gnueabi" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="arm-unknown-linux-gnueabi" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
-          make -j8
-          make install
-      - name: Compress build for armel
-        run: tar -czf icu4c_linux_armel.tar.gz icu4c
-      - name: Upload build for armel
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "$RELEASE_NAME" icu4c_linux_armel.tar.gz --clobber
-      - name: Clean build directory
-        run: rm -rf icu4c/*
-
   boost_linux:
     name: Boost for Linux
     needs: [create_release]
@@ -228,8 +210,6 @@ jobs:
         run: sudo apt install --yes binutils-s390x-linux-gnu cpp-14-s390x-linux-gnu g++-14-s390x-linux-gnu gcc-14-s390x-linux-gnu libc6-dev-s390x-cross libc6-s390x-cross libgcc-14-dev-s390x-cross libstdc++6-s390x-cross libstdc++-14-dev-s390x-cross libstdc++-14-pic-s390x-cross linux-libc-dev-s390x-cross
       - name: Install build tools for armhf
         run: sudo apt install --yes binutils-arm-linux-gnueabihf cpp-14-arm-linux-gnueabihf g++-14-arm-linux-gnueabihf gcc-14-arm-linux-gnueabihf libc6-dev-armhf-cross libc6-armhf-cross libgcc-14-dev-armhf-cross libstdc++6-armhf-cross libstdc++-14-dev-armhf-cross libstdc++-14-pic-armhf-cross linux-libc-dev-armhf-cross
-      - name: Install build tools for armel
-        run: sudo apt install --yes binutils-arm-linux-gnueabi cpp-14-arm-linux-gnueabi g++-14-arm-linux-gnueabi gcc-14-arm-linux-gnueabi libc6-dev-armel-cross libc6-armel-cross libgcc-14-dev-armel-cross libstdc++6-armel-cross libstdc++-14-dev-armel-cross libstdc++-14-pic-armel-cross linux-libc-dev-armel-cross
       - name: Download boost source
         run: |
           wget https://github.com/boostorg/boost/releases/download/boost-${{ inputs.boostVersion }}/boost-${{ inputs.boostVersion }}-b2-nodocs.tar.gz
@@ -353,20 +333,6 @@ jobs:
         run: |
           rm -rf boost/*
           rm -rf boost_linux_armhf.tar.gz
-
-      - name: Building for armel
-        working-directory: boost-project
-        run: ./b2 install toolset=gcc-armel --with-json --with-filesystem --with-process --prefix="$GITHUB_WORKSPACE/boost"
-      - name: Compress build for armel
-        run: tar -czf boost_linux_armel.tar.gz boost
-      - name: Upload build for armel
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "$RELEASE_NAME" boost_linux_armel.tar.gz --clobber
-      - name: Clear build directory
-        run: |
-          rm -rf boost/*
-          rm -rf boost_linux_armel.tar.gz
 
   llvm_linux_x64:
     name: LLVM for Linux x64
@@ -770,57 +736,6 @@ jobs:
         run: |
           gh release upload "$RELEASE_NAME" runtimes_linux_armhf.tar.gz --clobber
           rm runtimes_linux_armhf.tar.gz
-
-  llvm_linux_armel:
-    name: LLVM for Linux armel
-    needs: [create_release, llvm_linux_x64]
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set release name
-        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
-      - name: Install build tools for x64
-        run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
-      - name: Install build tools for armel
-        run: sudo apt install --yes binutils-arm-linux-gnueabi cpp-14-arm-linux-gnueabi g++-14-arm-linux-gnueabi gcc-14-arm-linux-gnueabi libc6-dev-armel-cross libc6-armel-cross libgcc-14-dev-armel-cross libstdc++6-armel-cross libstdc++-14-dev-armel-cross libstdc++-14-pic-armel-cross linux-libc-dev-armel-cross
-      - name: Download LLVM source
-        run: |
-          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
-          tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
-          mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
-          wget https://github.com/qatlang/ci-files/releases/download/$RELEASE_NAME/llvm_linux_x64.tar.gz
-          tar -xzf llvm_linux_x64.tar.gz
-          mv llvm llvm_build_x64
-          mkdir llvm
-          mkdir runtimes
-
-      - name: Build LLVM for armel
-        working-directory: llvm-project/llvm
-        run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/armel.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="arm-unknown-linux-gnueabi" -DLLVM_HOST_TRIPLE="arm-unknown-linux-gnueabi" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
-          cmake --build build --config Release --target install
-      - name: Compress LLVM for armel
-        run: tar -czf llvm_linux_armel.tar.gz llvm
-      - name: Upload LLVM for armel
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload "$RELEASE_NAME" llvm_linux_armel.tar.gz --clobber
-          rm llvm_linux_armel.tar.gz
-      - name: Build runtimes for armel
-        working-directory: llvm-project/runtimes
-        run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/armel_clang.cmake" -DLLVM_RUNTIME_TARGETS="arm-unknown-linux-gnueabi" -DLLVM_DEFAULT_TARGET_TRIPLE="arm-unknown-linux-gnueabi" -DLLVM_HOST_TRIPLE="arm-unknown-linux-gnueabi" -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
-          cmake --build build --config Release --parallel 4 --target install
-      - name: Compress runtimes for armel
-        run: tar -czf runtimes_linux_armel.tar.gz runtimes
-      - name: Upload runtimes for armel
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload "$RELEASE_NAME" runtimes_linux_armel.tar.gz --clobber
-          rm runtimes_linux_armel.tar.gz
 
   macos_icu4c:
     name: icu4c for macOS (arm64, x64)
