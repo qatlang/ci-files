@@ -72,7 +72,7 @@ jobs:
         working-directory: build_x64
         run: |
           CC=clang-20 CXX=clang++-20 ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c"
-          make -j4
+          make -j8
           make install
       - name: Compress build for x64
         run: tar -czf icu4c_linux_x64.tar.gz icu4c
@@ -87,7 +87,7 @@ jobs:
         working-directory: build_i686
         run: |
           CC=clang-20 CXX=clang++-20 CFLAGS=" --target=i686-unknown-linux-gnu" CXXFLAGS=" --target=i686-unknown-linux-gnu" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="i686-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
-          make -j4
+          make -j8
           make install
       - name: Compress build for i686
         run: tar -czf icu4c_linux_i686.tar.gz icu4c
@@ -102,7 +102,7 @@ jobs:
         working-directory: build_arm64
         run: |
           CC=clang-20 CXX=clang++-20 CFLAGS=" --target=aarch64-unknown-linux-gnu" CXXFLAGS=" --target=aarch64-unknown-linux-gnu" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="aarch64-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
-          make -j4
+          make -j8
           make install
       - name: Compress build for arm64
         run: tar -czf icu4c_linux_arm64.tar.gz icu4c
@@ -117,7 +117,7 @@ jobs:
         working-directory: build_riscv64
         run: |
           CC=clang-20 CXX=clang++-20 CFLAGS=" --target=riscv64-unknown-linux-gnu" CXXFLAGS=" --target=riscv64-unknown-linux-gnu" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="riscv64-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
-          make -j4
+          make -j8
           make install
       - name: Compress build for riscv64
         run: tar -czf icu4c_linux_riscv64.tar.gz icu4c
@@ -132,7 +132,7 @@ jobs:
         working-directory: build_ppc64le
         run: |
           CC=clang-20 CXX=clang++-20 CFLAGS=" --target=powerpc64le-unknown-linux-gnu" CXXFLAGS=" --target=powerpc64le-unknown-linux-gnu" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="powerpc64le-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
-          make -j4
+          make -j8
           make install
       - name: Compress build for powerpc64le
         run: tar -czf icu4c_linux_ppc64le.tar.gz icu4c
@@ -147,7 +147,7 @@ jobs:
         working-directory: build_ppc64
         run: |
           CC=clang-20 CXX=clang++-20 CFLAGS=" --target=powerpc64-unknown-linux-gnu" CXXFLAGS=" --target=powerpc64-unknown-linux-gnu" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="powerpc64-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
-          make -j4
+          make -j8
           make install
       - name: Compress build for powerpc64
         run: tar -czf icu4c_linux_ppc64.tar.gz icu4c
@@ -162,7 +162,7 @@ jobs:
         working-directory: build_s390x
         run: |
           CC=clang-20 CXX=clang++-20 CFLAGS=" --target=s390x-unknown-linux-gnu" CXXFLAGS=" --target=s390x-unknown-linux-gnu" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="s390x-unknown-linux-gnu" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
-          make -j4
+          make -j8
           make install
       - name: Compress build for s390x
         run: tar -czf icu4c_linux_s390x.tar.gz icu4c
@@ -177,7 +177,7 @@ jobs:
         working-directory: build_armhf
         run: |
           CC=clang-20 CXX=clang++-20 CFLAGS=" --target=arm-unknown-linux-gnueabihf" CXXFLAGS=" --target=arm-unknown-linux-gnueabihf" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="arm-unknown-linux-gnueabihf" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
-          make -j4
+          make -j8
           make install
       - name: Compress build for armhf
         run: tar -czf icu4c_linux_armhf.tar.gz icu4c
@@ -192,7 +192,7 @@ jobs:
         working-directory: build_armel
         run: |
           CC=clang-20 CXX=clang++-20 CFLAGS=" --target=arm-unknown-linux-gnueabi" CXXFLAGS=" --target=arm-unknown-linux-gnueabi" ../icu/source/configure --enable-static --prefix="$GITHUB_WORKSPACE/icu4c" --host="arm-unknown-linux-gnueabi" --build="x86_64-unknown-linux-gnu" --with-cross-build="$GITHUB_WORKSPACE/build_x64"
-          make -j4
+          make -j8
           make install
       - name: Compress build for armel
         run: tar -czf icu4c_linux_armel.tar.gz icu4c
@@ -390,7 +390,7 @@ jobs:
       - name: Build LLVM for x64
         working-directory: llvm-project/llvm
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_C_COMPILER="clang-20" -DCMAKE_CXX_COMPILER="clang++-20" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_USE_LLD=ON -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_C_COMPILER="clang-20" -DCMAKE_CXX_COMPILER="clang++-20" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_USE_LLD=ON -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBPFM=OFF
           cmake --build build --config Release --target install
       - name: Compress LLVM for x64
         run: tar -czf llvm_linux_x64.tar.gz llvm
@@ -403,7 +403,7 @@ jobs:
       - name: Build runtimes for x64
         working-directory: llvm-project/runtimes
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DLLVM_RUNTIME_TARGETS="x86_64-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="x86_64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="x86_64-unknown-linux-gnu" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DLLVM_RUNTIME_TARGETS="x86_64-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="x86_64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="x86_64-unknown-linux-gnu" -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF
           cmake --build build --config Release --parallel 4 --target install
       - name: Compress runtimes for x64
         run: tar -czf runtimes_linux_x64.tar.gz runtimes
@@ -441,7 +441,7 @@ jobs:
       - name: Build LLVM for i686
         working-directory: llvm-project/llvm
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/i686.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="i686-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="i686-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/i686.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="i686-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="i686-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
           cmake --build build --config Release --target install
       - name: Compress LLVM for i686
         run: tar -czf llvm_linux_i686.tar.gz llvm
@@ -454,7 +454,7 @@ jobs:
       - name: Build runtimes for i686
         working-directory: llvm-project/runtimes
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/i686.cmake" -DLLVM_RUNTIME_TARGETS="i686-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="i686-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="i686-unknown-linux-gnu" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/i686.cmake" -DLLVM_RUNTIME_TARGETS="i686-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="i686-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="i686-unknown-linux-gnu" -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
           cmake --build build --config Release --parallel 4 --target install
       - name: Compress runtimes for i686
         run: tar -czf runtimes_linux_i686.tar.gz runtimes
@@ -492,7 +492,7 @@ jobs:
       - name: Build LLVM for arm64
         working-directory: llvm-project/llvm
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/arm64.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="aarch64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="aarch64-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/arm64.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="aarch64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="aarch64-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
           cmake --build build --config Release --target install
       - name: Compress LLVM for arm64
         run: tar -czf llvm_linux_arm64.tar.gz llvm
@@ -505,7 +505,7 @@ jobs:
       - name: Build runtimes for arm64
         working-directory: llvm-project/runtimes
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/arm64.cmake" -DLLVM_RUNTIME_TARGETS="aarch64-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="aarch64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="aarch64-unknown-linux-gnu" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/arm64.cmake" -DLLVM_RUNTIME_TARGETS="aarch64-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="aarch64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="aarch64-unknown-linux-gnu" -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
           cmake --build build --config Release --parallel 4 --target install
       - name: Compress runtimes for arm64
         run: tar -czf runtimes_linux_arm64.tar.gz runtimes
@@ -543,7 +543,7 @@ jobs:
       - name: Build LLVM for riscv64
         working-directory: llvm-project/llvm
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/riscv64.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="riscv64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="riscv64-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/riscv64.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="riscv64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="riscv64-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
           cmake --build build --config Release --target install
       - name: Compress LLVM for riscv64
         run: tar -czf llvm_linux_riscv64.tar.gz llvm
@@ -556,7 +556,7 @@ jobs:
       - name: Build runtimes for riscv64
         working-directory: llvm-project/runtimes
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/riscv64.cmake" -DLLVM_RUNTIME_TARGETS="riscv64-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="riscv64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="riscv64-unknown-linux-gnu" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/riscv64.cmake" -DLLVM_RUNTIME_TARGETS="riscv64-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="riscv64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="riscv64-unknown-linux-gnu" -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
           cmake --build build --config Release --parallel 4 --target install
       - name: Compress runtimes for riscv64
         run: tar -czf runtimes_linux_riscv64.tar.gz runtimes
@@ -594,7 +594,7 @@ jobs:
       - name: Build LLVM for powerpc64le
         working-directory: llvm-project/llvm
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/ppc64le.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="powerpc64le-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="powerpc64le-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/ppc64le.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="powerpc64le-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="powerpc64le-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
           cmake --build build --config Release --target install
       - name: Compress LLVM for powerpc64le
         run: tar -czf llvm_linux_ppc64le.tar.gz llvm
@@ -607,7 +607,7 @@ jobs:
       - name: Build runtimes for powerpc64le
         working-directory: llvm-project/runtimes
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/ppc64le.cmake" -DLLVM_RUNTIME_TARGETS="powerpc64le-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="powerpc64le-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="powerpc64le-unknown-linux-gnu" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/ppc64le.cmake" -DLLVM_RUNTIME_TARGETS="powerpc64le-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="powerpc64le-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="powerpc64le-unknown-linux-gnu" -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
           cmake --build build --config Release --parallel 4 --target install
       - name: Compress runtimes for powerpc64le
         run: tar -czf runtimes_linux_ppc64le.tar.gz runtimes
@@ -645,7 +645,7 @@ jobs:
       - name: Build LLVM for powerpc64
         working-directory: llvm-project/llvm
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/ppc64.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="powerpc64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="powerpc64-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/ppc64.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="powerpc64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="powerpc64-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
           cmake --build build --config Release --target install
       - name: Compress LLVM for powerpc64
         run: tar -czf llvm_linux_ppc64.tar.gz llvm
@@ -658,7 +658,7 @@ jobs:
       - name: Build runtimes for powerpc64
         working-directory: llvm-project/runtimes
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/ppc64le.cmake" -DLLVM_RUNTIME_TARGETS="powerpc64-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="powerpc64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="powerpc64-unknown-linux-gnu" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/ppc64le.cmake" -DLLVM_RUNTIME_TARGETS="powerpc64-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="powerpc64-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="powerpc64-unknown-linux-gnu" -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
           cmake --build build --config Release --parallel 4 --target install
       - name: Compress runtimes for powerpc64
         run: tar -czf runtimes_linux_ppc64.tar.gz runtimes
@@ -696,7 +696,7 @@ jobs:
       - name: Build LLVM for s390x
         working-directory: llvm-project/llvm
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/s390x.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="s390x-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="s390x-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/s390x.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="s390x-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="s390x-unknown-linux-gnu" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
           cmake --build build --config Release --target install
       - name: Compress LLVM for s390x
         run: tar -czf llvm_linux_s390x.tar.gz llvm
@@ -709,7 +709,7 @@ jobs:
       - name: Build runtimes for s390x
         working-directory: llvm-project/runtimes
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/s390x.cmake" -DLLVM_RUNTIME_TARGETS="s390x-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="s390x-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="s390x-unknown-linux-gnu" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/s390x.cmake" -DLLVM_RUNTIME_TARGETS="s390x-unknown-linux-gnu" -DLLVM_DEFAULT_TARGET_TRIPLE="s390x-unknown-linux-gnu" -DLLVM_HOST_TRIPLE="s390x-unknown-linux-gnu" -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
           cmake --build build --config Release --parallel 4 --target install
       - name: Compress runtimes for s390x
         run: tar -czf runtimes_linux_s390x.tar.gz runtimes
@@ -747,7 +747,7 @@ jobs:
       - name: Build LLVM for armhf
         working-directory: llvm-project/llvm
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/armhf.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="arm-unknown-linux-gnueabihf" -DLLVM_HOST_TRIPLE="arm-unknown-linux-gnueabihf" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/armhf.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="arm-unknown-linux-gnueabihf" -DLLVM_HOST_TRIPLE="arm-unknown-linux-gnueabihf" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
           cmake --build build --config Release --target install
       - name: Compress LLVM for armhf
         run: tar -czf llvm_linux_armhf.tar.gz llvm
@@ -760,7 +760,7 @@ jobs:
       - name: Build runtimes for armhf
         working-directory: llvm-project/runtimes
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/armhf.cmake" -DLLVM_RUNTIME_TARGETS="arm-unknown-linux-gnueabihf" -DLLVM_DEFAULT_TARGET_TRIPLE="arm-unknown-linux-gnueabihf" -DLLVM_HOST_TRIPLE="arm-unknown-linux-gnueabihf" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/armhf.cmake" -DLLVM_RUNTIME_TARGETS="arm-unknown-linux-gnueabihf" -DLLVM_DEFAULT_TARGET_TRIPLE="arm-unknown-linux-gnueabihf" -DLLVM_HOST_TRIPLE="arm-unknown-linux-gnueabihf" -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
           cmake --build build --config Release --parallel 4 --target install
       - name: Compress runtimes for armhf
         run: tar -czf runtimes_linux_armhf.tar.gz runtimes
@@ -798,7 +798,7 @@ jobs:
       - name: Build LLVM for armel
         working-directory: llvm-project/llvm
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/armel.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="arm-unknown-linux-gnueabi" -DLLVM_HOST_TRIPLE="arm-unknown-linux-gnueabi" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=4 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/armel.cmake" -DLLVM_DEFAULT_TARGET_TRIPLE="arm-unknown-linux-gnueabi" -DLLVM_HOST_TRIPLE="arm-unknown-linux-gnueabi" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen" -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF
           cmake --build build --config Release --target install
       - name: Compress LLVM for armel
         run: tar -czf llvm_linux_armel.tar.gz llvm
@@ -811,7 +811,7 @@ jobs:
       - name: Build runtimes for armel
         working-directory: llvm-project/runtimes
         run: |
-          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/armel_clang.cmake" -DLLVM_RUNTIME_TARGETS="arm-unknown-linux-gnueabi" -DLLVM_DEFAULT_TARGET_TRIPLE="arm-unknown-linux-gnueabi" -DLLVM_HOST_TRIPLE="arm-unknown-linux-gnueabi" -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RUNTIMES="compiler-rt" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/runtimes" -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/config/toolchains/armel_clang.cmake" -DLLVM_RUNTIME_TARGETS="arm-unknown-linux-gnueabi" -DLLVM_DEFAULT_TARGET_TRIPLE="arm-unknown-linux-gnueabi" -DLLVM_HOST_TRIPLE="arm-unknown-linux-gnueabi" -DLLVM_PARALLEL_COMPILE_JOBS=8 -DLLVM_PARALLEL_LINK_JOBS=2 -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF -DCOMPILER_RT_BUILD_MEMPROF=OFF -DCOMPILER_RT_BUILD_ORC=OFF -DCOMPILER_RT_BUILD_GWP_ASAN=OFF -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen"
           cmake --build build --config Release --parallel 4 --target install
       - name: Compress runtimes for armel
         run: tar -czf runtimes_linux_armel.tar.gz runtimes
@@ -847,7 +847,7 @@ jobs:
         working-directory: build_arm64
         run: |
           CFLAGS="-std=c11 -arch arm64 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" CXXFLAGS="-std=c++23 -arch arm64 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" ../icu/source/configure --prefix="$GITHUB_WORKSPACE/icu4c" --enable-static --disable-shared
-          make -j4
+          make -j6
           make install
       - name: Compress build for arm64
         run: tar -cvzf icu4c_macos_arm64.tar.gz icu4c
@@ -860,7 +860,7 @@ jobs:
         working-directory: build_x64
         run: |
           CFLAGS="-std=c11 -arch x86_64 -target x86_64-apple-darwin -isysroot $SDK_PATH" CXXFLAGS="-std=c++23 -arch x86_64 -target x86_64-apple-darwin -isysroot $SDK_PATH" ../icu/source/configure --prefix="$GITHUB_WORKSPACE/icu4c" --host="x86_64-apple-darwin" --build="arm64-apple-macos11" --enable-static --disable-shared --with-cross-build="$GITHUB_WORKSPACE/build_arm64"
-          make -j4
+          make -j6
           make install
       - name: Compress build for x64
         run: tar -cvzf icu4c_macos_x64.tar.gz icu4c
