@@ -25,17 +25,7 @@ jobs:
       - name: Create release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }} --title "llvm ${{ inputs.llvmVersion }}, boost ${{ inputs.boostVersion }}, icu4c ${{ inputs.icuVersion }}" --notes "Release notes are updated manually, so it is work in progress" --draft
-  create_llvm_x64_release:
-    name: Create release for LLVM x64
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Create release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create llvm${{ inputs.llvmVersion }} --title "llvm ${{ inputs.llvmVersion }}" --notes "LLVM ${{ inputs.llvmVersion }}"
+        run: gh release create llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }} --title "llvm ${{ inputs.llvmVersion }}, boost ${{ inputs.boostVersion }}, icu4c ${{ inputs.icuVersion }}" --notes "Release notes are updated manually, so it is work in progress"
 
   icu4c_linux:
     name: icu4c for Linux
@@ -380,7 +370,7 @@ jobs:
 
   llvm_linux_x64:
     name: LLVM for Linux x64
-    needs: [create_release, create_llvm_x64_release]
+    needs: [create_release]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -409,7 +399,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload "$RELEASE_NAME" llvm_linux_x64.tar.gz --clobber
-          gh release upload "llvm${{ inputs.llvmVersion }}" llvm_linux_x64.tar.gz --clobber
           rm llvm_linux_x64.tar.gz
       - name: Build runtimes for x64
         working-directory: llvm-project/runtimes
@@ -427,7 +416,7 @@ jobs:
 
   llvm_linux_i686:
     name: LLVM for Linux i686
-    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
+    needs: [create_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -443,7 +432,7 @@ jobs:
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
-          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          wget https://github.com/qatlang/ci-files/releases/download/$RELEASE_NAME/llvm_linux_x64.tar.gz
           tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
@@ -478,7 +467,7 @@ jobs:
 
   llvm_linux_arm64:
     name: LLVM for Linux arm64
-    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
+    needs: [create_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -494,7 +483,7 @@ jobs:
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
-          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          wget https://github.com/qatlang/ci-files/releases/download/$RELEASE_NAME/llvm_linux_x64.tar.gz
           tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
@@ -529,7 +518,7 @@ jobs:
 
   llvm_linux_riscv64:
     name: LLVM for Linux riscv64
-    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
+    needs: [create_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -545,7 +534,7 @@ jobs:
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
-          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          wget https://github.com/qatlang/ci-files/releases/download/$RELEASE_NAME/llvm_linux_x64.tar.gz
           tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
@@ -580,7 +569,7 @@ jobs:
 
   llvm_linux_ppc64le:
     name: LLVM for Linux powerpc64le
-    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
+    needs: [create_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -596,7 +585,7 @@ jobs:
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
-          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          wget https://github.com/qatlang/ci-files/releases/download/$RELEASE_NAME/llvm_linux_x64.tar.gz
           tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
@@ -631,7 +620,7 @@ jobs:
 
   llvm_linux_ppc64:
     name: LLVM for Linux powerpc64
-    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
+    needs: [create_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -647,7 +636,7 @@ jobs:
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
-          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          wget https://github.com/qatlang/ci-files/releases/download/$RELEASE_NAME/llvm_linux_x64.tar.gz
           tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
@@ -682,7 +671,7 @@ jobs:
 
   llvm_linux_s390x:
     name: LLVM for Linux s390x
-    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
+    needs: [create_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -698,7 +687,7 @@ jobs:
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
-          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          wget https://github.com/qatlang/ci-files/releases/download/$RELEASE_NAME/llvm_linux_x64.tar.gz
           tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
@@ -733,7 +722,7 @@ jobs:
 
   llvm_linux_armhf:
     name: LLVM for Linux armhf
-    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
+    needs: [create_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -749,7 +738,7 @@ jobs:
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
-          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          wget https://github.com/qatlang/ci-files/releases/download/$RELEASE_NAME/llvm_linux_x64.tar.gz
           tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
@@ -784,7 +773,7 @@ jobs:
 
   llvm_linux_armel:
     name: LLVM for Linux armel
-    needs: [create_release, create_llvm_x64_release, llvm_linux_x64]
+    needs: [create_release, llvm_linux_x64]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -800,7 +789,7 @@ jobs:
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
           mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
-          wget https://github.com/qatlang/ci-files/releases/download/llvm${{ inputs.llvmVersion }}/llvm_linux_x64.tar.gz
+          wget https://github.com/qatlang/ci-files/releases/download/$RELEASE_NAME/llvm_linux_x64.tar.gz
           tar -xzf llvm_linux_x64.tar.gz
           mv llvm llvm_build_x64
           mkdir llvm
@@ -832,28 +821,6 @@ jobs:
         run: |
           gh release upload "$RELEASE_NAME" runtimes_linux_armel.tar.gz --clobber
           rm runtimes_linux_armel.tar.gz
-
-  delete_llvm_x64_release:
-    name: Delete dummy release for LLVM
-    needs:
-      [
-        llvm_linux_x64,
-        llvm_linux_arm64,
-        llvm_linux_i686,
-        llvm_linux_riscv64,
-        llvm_linux_s390x,
-        llvm_linux_ppc64le,
-        llvm_linux_ppc64,
-        llvm_linux_armhf,
-        llvm_linux_armel,
-      ]
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: Delete release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release delete "llvm${{ inputs.llvmVersion }}" --yes --cleanup-tag
 
   macos_icu4c:
     name: icu4c for macOS (arm64, x64)
