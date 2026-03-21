@@ -41,8 +41,7 @@ jobs:
         with:
           repository: "llvm/llvm-project"
           tag: llvmorg-${{ inputs.llvmVersion }}
-          fileName: llvm-project-${{ inputs.llvmVersion }}.src
-          tarBall: true
+          fileName: llvm-project-${{ inputs.llvmVersion }}.src.tar.gz
           extract: true
       - name: Extract LLVM source
         shell: powershell
