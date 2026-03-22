@@ -42,10 +42,7 @@ jobs:
       - name: Download LLVM source
         shell: bash
         run: |
-          wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-${{ inputs.llvmVersion }}.zip
-          unzip llvmorg-${{ inputs.llvmVersion }}.zip
-          ls
-          mv llvmorg-${{ inputs.llvmVersion }} llvm-project
+          git clone --depth 1 --branch llvmorg-${{ inputs.llvmVersion }} https://github.com/llvm/llvm-project.git
           mkdir llvm
 
       - name: Build LLVM for x64
