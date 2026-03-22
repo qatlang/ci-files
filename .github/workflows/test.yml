@@ -50,7 +50,7 @@ jobs:
         shell: bash
         run: |
           cmake -S . -B "$GITHUB_WORKSPACE/llvm-project/llvm/build" -DCMAKE_BUILD_TYPE=Release -A x64 -G"Visual Studio 17 2022" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DLLVM_DEFAULT_TARGET_TRIPLE="x86_64-pc-windows-msvc" -DLLVM_HOST_TRIPLE="x86_64-pc-windows-msvc" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_STANDARD=20 -DCMAKE_C_STANDARD=11 -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBPFM=OFF -DLLVM_PARALLEL_LINK_JOBS=2
-          cmake --build "$GITHUB_WORKSPACE/llvm-project/llvm/build" --target install --config Release
+          cmake --build "$GITHUB_WORKSPACE/llvm-project/llvm/build" --target install --parallel 4 --config Release
       - name: Compressing build for x64
         uses: vimtor/action-zip@v1.3
         with:
@@ -61,7 +61,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "$RELEASE_NAME" llvm_windows_x64.zip --clobber
+        run: gh release upload llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }} llvm_windows_x64.zip --clobber
       - name: Renaming build folder for x64
         shell: bash
         run: |
@@ -74,7 +74,7 @@ jobs:
         shell: bash
         run: |
           cmake -S . -B "$GITHUB_WORKSPACE/llvm-project/llvm/build" -DCMAKE_BUILD_TYPE=Release -A Win32 -G"Visual Studio 17 2022" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DLLVM_DEFAULT_TARGET_TRIPLE="i686-pc-windows-msvc" -DLLVM_HOST_TRIPLE="i686-pc-windows-msvc" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen.exe" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_STANDARD=20 -DCMAKE_C_STANDARD=11 -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBPFM=OFF -DLLVM_PARALLEL_LINK_JOBS=2
-          cmake --build "$GITHUB_WORKSPACE/llvm-project/llvm/build" --target install --config Release
+          cmake --build "$GITHUB_WORKSPACE/llvm-project/llvm/build" --target install --parallel 4 --config Release
       - name: Compressing build for i686
         uses: vimtor/action-zip@v1.3
         with:
@@ -85,7 +85,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "$RELEASE_NAME" llvm_windows_i686.zip --clobber
+        run: gh release upload llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }} llvm_windows_i686.zip --clobber
       - name: Cleaning build folder for i686
         shell: bash
         run: |
@@ -98,7 +98,7 @@ jobs:
         shell: bash
         run: |
           cmake -S . -B "$GITHUB_WORKSPACE/llvm-project/llvm/build" -DCMAKE_BUILD_TYPE=Release -A ARM64 -G"Visual Studio 17 2022" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DLLVM_DEFAULT_TARGET_TRIPLE="aarch64-pc-windows-msvc" -DLLVM_HOST_TRIPLE="aarch64-pc-windows-msvc" -DLLVM_NATIVE_TOOL_DIR="$GITHUB_WORKSPACE/llvm_build_x64/bin" -DLLVM_TABLEGEN="$GITHUB_WORKSPACE/llvm_build_x64/bin/llvm-tblgen.exe" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_STANDARD=20 -DCMAKE_C_STANDARD=11 -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBPFM=OFF -DLLVM_PARALLEL_LINK_JOBS=2
-          cmake --build "$GITHUB_WORKSPACE/llvm-project/llvm/build" --target install --config Release
+          cmake --build "$GITHUB_WORKSPACE/llvm-project/llvm/build" --target install --parallel 4 --config Release
       - name: Compressing build for arm64
         uses: vimtor/action-zip@v1.3
         with:
@@ -109,5 +109,5 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "$RELEASE_NAME" llvm_windows_arm64.zip --clobber
+        run: gh release upload llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }} llvm_windows_arm64.zip --clobber
 
