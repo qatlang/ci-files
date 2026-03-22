@@ -1,6 +1,6 @@
 using clang : x64 : clang++-20 :
 	<cflags>"-std=c11"
-	<cxxflags>"-std=c++23" ;
+	<cxxflags>"-std=c++20" ;
 
 using clang : powerpc64le : clang++-20 :
 	<variant>release
@@ -10,7 +10,7 @@ using clang : powerpc64le : clang++-20 :
 	<address-model>64
 	<compileflags>"--target=powerpc64le-linux-gnu"
 	<linkflags>"--target=powerpc64le-linux-gnu"
-	<cxxflags>"-std=c++23"
+	<cxxflags>"-std=c++20"
 	<cflags>"-std=c11" ;
 
 using clang : powerpc64 : clang++-20 :
@@ -18,7 +18,7 @@ using clang : powerpc64 : clang++-20 :
 	<architecture>power <address-model>64
 	<compileflags>"--target=powerpc64-linux-gnu"
 	<linkflags>"--target=powerpc64-linux-gnu"
-	<cxxflags>"-std=c++23"
+	<cxxflags>"-std=c++20"
 	<cflags>"-std=c11" ;
 
 using clang : i686 : clang++-20 :
@@ -26,7 +26,7 @@ using clang : i686 : clang++-20 :
 	<architecture>x86 <address-model>32
 	<compileflags>"--target=i686-linux-gnu"
 	<linkflags>"--target=i686-linux-gnu"
-	<cxxflags>"-std=c++23"
+	<cxxflags>"-std=c++20"
 	<cflags>"-std=c11" ;
 
 using clang : s390x : clang++-20 :
@@ -34,13 +34,13 @@ using clang : s390x : clang++-20 :
 	<architecture>s390x <address-model>64
 	<compileflags>"--target=s390x-linux-gnu"
 	<linkflags>"--target=s390x-linux-gnu"
-	<cxxflags>"-std=c++23"
+	<cxxflags>"-std=c++20"
 	<cflags>"-std=c11" ;
 
 using clang : arm64 : clang++-20 :
         <variant>release <link>static <threading>multi
         <architecture>arm <address-model>64
-        <cxxflags>"-std=c++23"
+        <cxxflags>"-std=c++20"
         <cflags>"-std=c11"
 	<archiver>"aarch64-linux-gnu-ar"
 	<nm>"aarch64-linux-gnu-nm"
@@ -51,7 +51,7 @@ using clang : arm64 : clang++-20 :
 using clang : riscv64 : clang++-20 :
         <variant>release <link>static <threading>multi
         <architecture>riscv <address-model>64
-        <cxxflags>"-std=c++23"
+        <cxxflags>"-std=c++20"
         <cflags>"-std=c11"
 	<archiver>"riscv64-linux-gnu-ar"
 	<nm>"riscv64-linux-gnu-nm"
@@ -62,7 +62,7 @@ using clang : riscv64 : clang++-20 :
 using gcc : armhf : arm-linux-gnueabihf-g++-14 :
 	<variant>release <link>static <threading>multi
 	<architecture>arm <address-model>32
-	<cxxflags>"-std=c++23"
+	<cxxflags>"-std=c++20"
 	<cflags>"-std=c11"
 	<archiver>"arm-linux-gnueabihf-ar"
 	<nm>"arm-linux-gnueabihf-nm"
@@ -73,7 +73,7 @@ using gcc : armhf : arm-linux-gnueabihf-g++-14 :
 using gcc : armel : arm-linux-gnueabi-g++-14 :
 	<variant>release <link>static <threading>multi
 	<architecture>arm <address-model>32
-	<cxxflags>"-std=c++23" <cflags>"-std=c11"
+	<cxxflags>"-std=c++20" <cflags>"-std=c11"
 	<archiver>"arm-linux-gnueabi-ar"
 	<nm>"arm-linux-gnueabi-nm"
 	<strip>"arm-linux-gnueabi-strip"

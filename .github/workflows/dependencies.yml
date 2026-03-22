@@ -761,7 +761,7 @@ jobs:
       - name: Building for arm64
         working-directory: build_arm64
         run: |
-          CFLAGS="-std=c11 -arch arm64 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" CXXFLAGS="-std=c++23 -arch arm64 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" ../icu/source/configure --prefix="$GITHUB_WORKSPACE/icu4c" --enable-static --disable-shared
+          CFLAGS="-std=c11 -arch arm64 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" CXXFLAGS="-std=c++20 -arch arm64 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" ../icu/source/configure --prefix="$GITHUB_WORKSPACE/icu4c" --enable-static --disable-shared
           make -j6
           make install
       - name: Compress build for arm64
@@ -774,7 +774,7 @@ jobs:
       - name: Building for x64
         working-directory: build_x64
         run: |
-          CFLAGS="-std=c11 -arch x86_64 -target x86_64-apple-darwin -isysroot $SDK_PATH" CXXFLAGS="-std=c++23 -arch x86_64 -target x86_64-apple-darwin -isysroot $SDK_PATH" ../icu/source/configure --prefix="$GITHUB_WORKSPACE/icu4c" --host="x86_64-apple-darwin" --build="arm64-apple-macos11" --enable-static --disable-shared --with-cross-build="$GITHUB_WORKSPACE/build_arm64"
+          CFLAGS="-std=c11 -arch x86_64 -target x86_64-apple-darwin -isysroot $SDK_PATH" CXXFLAGS="-std=c++20 -arch x86_64 -target x86_64-apple-darwin -isysroot $SDK_PATH" ../icu/source/configure --prefix="$GITHUB_WORKSPACE/icu4c" --host="x86_64-apple-darwin" --build="arm64-apple-macos11" --enable-static --disable-shared --with-cross-build="$GITHUB_WORKSPACE/build_arm64"
           make -j6
           make install
       - name: Compress build for x64
@@ -807,7 +807,7 @@ jobs:
 
       - name: Building for arm64
         working-directory: boost-project
-        run: ./b2 toolset=clang architecture=arm address-model=64 variant=release threading=multi link=static cxxflags="-std=c++23 -arch arm64 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" --prefix="$GITHUB_WORKSPACE/boost" --with-filesystem --with-json --with-process install
+        run: ./b2 toolset=clang architecture=arm address-model=64 variant=release threading=multi link=static cxxflags="-std=c++20 -arch arm64 -target arm64-apple-macos11 -mmacosx-version-min=11.0 -isysroot $SDK_PATH" --prefix="$GITHUB_WORKSPACE/boost" --with-filesystem --with-json --with-process install
       - name: Compressing build for arm64
         run: tar -czf boost_macos_arm64.tar.gz boost
       - name: Uploading build for arm64
@@ -819,7 +819,7 @@ jobs:
 
       - name: Building for x64
         working-directory: boost-project
-        run: ./b2 toolset=clang architecture=x86 address-model=64 variant=release threading=multi link=static cxxflags="-std=c++23 -arch x86_64 -target x86_64-apple-darwin -isysroot $SDK_PATH" --prefix="$GITHUB_WORKSPACE/boost" --with-filesystem --with-json --with-process install
+        run: ./b2 toolset=clang architecture=x86 address-model=64 variant=release threading=multi link=static cxxflags="-std=c++20 -arch x86_64 -target x86_64-apple-darwin -isysroot $SDK_PATH" --prefix="$GITHUB_WORKSPACE/boost" --with-filesystem --with-json --with-process install
       - name: Compressing build for x64
         run: tar -czf boost_macos_x64.tar.gz boost
       - name: Uploading build for x64
