@@ -67,6 +67,7 @@ jobs:
         run: |
           mv llvm llvm_build_x64
           mkdir llvm
+          rm -rf "$GITHUB_WORKSPACE/llvm-project/llvm/build"
 
       - name: Building LLVM for arm64
         working-directory: llvm-project/llvm
@@ -121,3 +122,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }} llvm_windows_i686.zip --clobber
+
