@@ -43,8 +43,9 @@ jobs:
         shell: bash
         run: |
           wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-${{ inputs.llvmVersion }}.zip
-          tar -xf llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
-          mv llvm-project-${{ inputs.llvmVersion }}.src llvm-project
+          unzip llvmorg-${{ inputs.llvmVersion }}.zip
+          ls
+          mv llvmorg-${{ inputs.llvmVersion }} llvm-project
           mkdir llvm
 
       - name: Build LLVM for x64
