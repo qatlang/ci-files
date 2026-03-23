@@ -17,25 +17,13 @@ on:
         type: string
 
 jobs:
-  create_release:
-    name: Create release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Create release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }} --title "llvm ${{ inputs.llvmVersion }}, boost ${{ inputs.boostVersion }}, icu4c ${{ inputs.icuVersion }}" --notes "Release notes are updated manually, so it is work in progress" --draft
-
-  llvm_windows_x64_and_arm64:
-    name: LLVM for Windows (x64, arm64)
-    needs: [create_release]
+  llvm_windows_arm64:
+    name: LLVM for Windows arm64
+    #needs: [create_release]
     runs-on: windows-2022
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Set release name
-        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
       - name: Install Visual Studio Community
         run: |
           choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.Component.MSBuild --add Microsoft.VisualStudio.Component.VC.ATLMFC --add Microsoft.VisualStudio.Component.VC.ATL.ARM64 --add Microsoft.VisualStudio.Component.VC.MFC.ARM64" -y
@@ -45,30 +33,16 @@ jobs:
           git clone --depth 1 --branch llvmorg-${{ inputs.llvmVersion }} https://github.com/llvm/llvm-project.git
           mkdir llvm
 
-      - name: Building LLVM for x64
-        working-directory: llvm-project/llvm
-        shell: bash
-        run: |
-          cmake -S . -B "$GITHUB_WORKSPACE/llvm-project/llvm/build" -DCMAKE_BUILD_TYPE=Release -A x64 -G"Visual Studio 17 2022" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DLLVM_DEFAULT_TARGET_TRIPLE="x86_64-pc-windows-msvc" -DLLVM_HOST_TRIPLE="x86_64-pc-windows-msvc" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_STANDARD=20 -DCMAKE_C_STANDARD=11 -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBPFM=OFF -DLLVM_PARALLEL_LINK_JOBS=2
-          cmake --build "$GITHUB_WORKSPACE/llvm-project/llvm/build" --target install --parallel 4 --config Release
-      - name: Compressing build for x64
-        uses: vimtor/action-zip@v1.3
+      - name: Downloading x64 build
+        uses: robinraju/release-downloader@v1
         with:
-          files: llvm
-          recursive: false
-          dest: llvm_windows_x64.zip
-      - name: Uploading build for x64
+          repository: ${{ github.repository }}
+          tag: llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}
+          fileName: llvm_windows_x64.zip
+          extract: true
+      - name: Rename x64 build folder
         shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }} llvm_windows_x64.zip --clobber
-      - name: Rename build folder for x64
-        shell: bash
-        run: |
-          mv llvm llvm_build_x64
-          mkdir llvm
-          rm -rf "$GITHUB_WORKSPACE/llvm-project/llvm/build"
-
+        run: mv llvm llvm_build_x64
       - name: Building LLVM for arm64
         working-directory: llvm-project/llvm
         shell: bash
@@ -86,40 +60,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }} llvm_windows_arm64.zip --clobber
-
-  llvm_windows_i686:
-    name: LLVM for Windows i686
-    needs: [create_release]
-    runs-on: windows-2022
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set release name
-        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
-      - name: Install Visual Studio Community
-        run: |
-          choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.Component.MSBuild --add Microsoft.VisualStudio.Component.VC.ATLMFC" -y
-      - name: Download LLVM source
-        shell: bash
-        run: |
-          git clone --depth 1 --branch llvmorg-${{ inputs.llvmVersion }} https://github.com/llvm/llvm-project.git
-          mkdir llvm
-
-      - name: Building LLVM for i686
-        working-directory: llvm-project/llvm
-        shell: bash
-        run: |
-          cmake -S . -B "$GITHUB_WORKSPACE/llvm-project/llvm/build" -DCMAKE_BUILD_TYPE=Release -A Win32 -G"Visual Studio 17 2022" -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="" -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/llvm" -DLLVM_DEFAULT_TARGET_TRIPLE="i686-pc-windows-msvc" -DLLVM_HOST_TRIPLE="i686-pc-windows-msvc" -DLLVM_TARGETS_TO_BUILD=all -DLIBCLANG_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_STANDARD=20 -DCMAKE_C_STANDARD=11 -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBPFM=OFF -DLLVM_PARALLEL_LINK_JOBS=2
-          cmake --build "$GITHUB_WORKSPACE/llvm-project/llvm/build" --target install --parallel 4 --config Release
-      - name: Compressing build for i686
-        uses: vimtor/action-zip@v1.3
-        with:
-          files: llvm
-          recursive: false
-          dest: llvm_windows_i686.zip
-      - name: Uploading build for i686
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }} llvm_windows_i686.zip --clobber
 
