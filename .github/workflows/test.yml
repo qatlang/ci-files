@@ -42,7 +42,7 @@ jobs:
           file_path: boost-project.zip
       - name: Bootstrap b2
         working-directory: boost-project
-        shell: bash
+        shell: powershell
         run: bootstrap.bat
 
       - name: Building for x64
