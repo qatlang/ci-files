@@ -1084,3 +1084,107 @@ jobs:
         shell: bash
         run: rm -rf boost/*
 
+  icu_windows:
+    name: icu for Windows
+    needs: [create_release]
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set release name
+        shell: bash
+        run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
+      - name: Install Visual Studio Community
+        run: choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.Component.MSBuild --add Microsoft.VisualStudio.Component.VC.ATLMFC --add Microsoft.VisualStudio.Component.VC.ATL.ARM64 --add Microsoft.VisualStudio.Component.VC.MFC.ARM64" -y
+      - name: Download icu source
+        shell: bash
+        run: curl -L -o icu_sources.zip https://github.com/unicode-org/icu/releases/download/release-${{ inputs.icuVersion }}/icu4c-${{ inputs.icuVersion }}-sources.zip
+      - name: Extract icu source
+        uses: ihiroky/extract-action@v1
+        with:
+          file_path: icu_sources.zip
+      - name: Setup folders
+        shell: bash
+        run: mkdir icu4c
+
+      - name: Setup dev env for x64
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+      - name: Building for x64
+        shell: powershell
+        working-directory: icu\source\allinone
+        run: msbuild allinone.sln "/t:common;i18n;makeconv;makedata;pkgdata;icuexportdata;stubdata;toolutil;uconv;io;iotest;icupkg;icuinfo" /p:Configuration=Release /p:Platform=x64 /m:4
+      - name: Copy files for x64
+        shell: bash
+        run: |
+          cp -r "$GITHUB_WORKSPACE/icu/bin64" "$GITHUB_WORKSPACE/icu4c/bin"
+          cp -r "$GITHUB_WORKSPACE/icu/lib64" "$GITHUB_WORKSPACE/icu4c/lib"
+      - name: Compressing build for x64
+        uses: vimtor/action-zip@v1.3
+        with:
+          files: icu4c
+          recursive: false
+          dest: icu4c_windows_x64.zip
+      - name: Uploading build for x64
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload $RELEASE_NAME icu4c_windows_x64.zip --clobber
+      - name: Clear release folder
+        shell: bash
+        run: rm -rf icu4c/*
+
+      - name: Setup dev env for Win32
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64_x86
+      - name: Building for Win32
+        shell: powershell
+        working-directory: icu\source\allinone
+        run: msbuild allinone.sln "/t:common;i18n;makeconv;makedata;pkgdata;icuexportdata;stubdata;toolutil;uconv;io;icupkg;icuinfo" /p:Configuration=Release /p:Platform=Win32 /m:4
+      - name: Copy files for Win32
+        shell: bash
+        run: |
+          cp -r "$GITHUB_WORKSPACE/icu/bin" "$GITHUB_WORKSPACE/icu4c/bin"
+          cp -r "$GITHUB_WORKSPACE/icu/lib" "$GITHUB_WORKSPACE/icu4c/lib"
+      - name: Compressing build for Win32
+        uses: vimtor/action-zip@v1.3
+        with:
+          files: icu4c
+          recursive: false
+          dest: icu4c_windows_i686.zip
+      - name: Uploading build for Win32
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload $RELEASE_NAME icu4c_windows_i686.zip --clobber
+      - name: Clear release folder
+        shell: bash
+        run: rm -rf icu4c/*
+
+      - name: Setup dev env for arm64
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64_arm64
+      - name: Building for arm64
+        shell: powershell
+        working-directory: icu\source\allinone
+        run: msbuild allinone.sln "/t:common;i18n;makeconv;makedata;pkgdata;icuexportdata;stubdata;toolutil;uconv;io;icupkg;icuinfo" /p:Configuration=Release /p:Platform=ARM64 /m:4
+      - name: Copy files for arm64
+        shell: bash
+        run: |
+          cp -r "$GITHUB_WORKSPACE/icu/binARM64" "$GITHUB_WORKSPACE/icu4c/bin"
+          cp -r "$GITHUB_WORKSPACE/icu/libARM64" "$GITHUB_WORKSPACE/icu4c/lib"
+      - name: Compressing build for arm64
+        uses: vimtor/action-zip@v1.3
+        with:
+          files: icu4c
+          recursive: false
+          dest: icu4c_windows_arm64.zip
+      - name: Uploading build for arm64
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload $RELEASE_NAME icu4c_windows_arm64.zip --clobber
+
