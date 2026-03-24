@@ -1001,6 +1001,7 @@ jobs:
 
   boost_windows:
     name: Boost for windows
+    needs: [create_release]
     runs-on: windows-2022
     steps:
       - name: Checkout
