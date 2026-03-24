@@ -44,7 +44,8 @@ jobs:
         shell: bash
         run: mkdir icu4c
 
-      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Setup dev env for x64
+        uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: amd64
       - name: Building for x64
@@ -69,7 +70,8 @@ jobs:
         shell: bash
         run: rm -rf icu4c/*
 
-      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Setup dev env for Win32
+        uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: amd64_x86
       - name: Building for Win32
@@ -94,7 +96,8 @@ jobs:
         shell: bash
         run: rm -rf icu4c/*
 
-      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Setup dev env for arm64
+        uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: amd64_arm64
       - name: Building for arm64
