@@ -1000,7 +1000,7 @@ jobs:
         run: gh release upload $RELEASE_NAME llvm_windows_arm64.zip --clobber
 
   boost_windows:
-    name: Boost for windows
+    name: Boost for Windows
     needs: [create_release]
     runs-on: windows-2022
     steps:
