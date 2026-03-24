@@ -62,7 +62,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload $RELEASE_NAME llvm_windows_arm64.zip --clobber
+        run: gh release upload $RELEASE_NAME boost_windows_x64.zip --clobber
       - name: Clear build folder
         shell: bash
         run: rm -rf boost/*
@@ -81,7 +81,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload $RELEASE_NAME llvm_windows_i686.zip --clobber
+        run: gh release upload $RELEASE_NAME boost_windows_i686.zip --clobber
       - name: Clear build folder
         shell: bash
         run: rm -rf boost/*
@@ -100,7 +100,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload $RELEASE_NAME llvm_windows_arm64.zip --clobber
+        run: gh release upload $RELEASE_NAME boost_windows_arm64.zip --clobber
       - name: Clear build folder
         shell: bash
         run: rm -rf boost/*
