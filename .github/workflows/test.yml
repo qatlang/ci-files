@@ -42,11 +42,7 @@ jobs:
           file_path: icu_sources.zip
       - name: Setup folders
         shell: bash
-        run: |
-          mkdir build_x64
-          mkdir build_i686
-          mkdir build_arm64
-          mkdir icu4c
+        run: mkdir icu4c
       - name: Building for x64
         shell: powershell
         working-directory: icu\icu4c\source\allinone
@@ -93,7 +89,7 @@ jobs:
 
       - name: Building for arm64
         shell: powershell
-        working-directory: icu\icu4c\source\allinone"
+        working-directory: icu\icu4c\source\allinone
         run: |
           msbuild allinone.sln /t:cintltst;common;derb;i18n;makeconv;makedata;pkgdata;icuexportdata;stubdata;toolutil;uconv;io;iotest;icupkg;icuinfo /p:Configuration=Release /p:Platform=ARM64 /m:4
           cp -r "$GITHUB_WORKSPACE/icu/icu4c/binARM64" "$GITHUB_WORKSPACE/icu4c/bin"
