@@ -11,6 +11,10 @@ on:
         required: true
         default: "1.90.0"
         type: string
+      boostVersionUnderscore:
+        required: true
+        default: "1_90_0"
+        type: string
       icuVersion:
         required: true
         default: "78.3"
