@@ -35,73 +35,8 @@ jobs:
           choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.Component.MSBuild --add Microsoft.VisualStudio.Component.VC.ATLMFC --add Microsoft.VisualStudio.Component.VC.ATL.ARM64 --add Microsoft.VisualStudio.Component.VC.MFC.ARM64" -y
       - name: Download Boost source
         shell: bash
-        run: curl -L -o boost-project.zip https://archives.boost.io/release/${{ inputs.boostVersion }}/source/boost_${{ inputs.boostVersionUnderscore }}.zip
-      - name: Extract Boost source
-        uses: ihiroky/extract-action@v1
-        with:
-          file_path: boost-project.zip
-      - name: Rename source folder
+        run: curl -L -o icu_sources.zip https://github.com/unicode-org/icu/releases/download/release-${{ inputs.icuVersion }}/icu4c-${{ inputs.icuVersion }}-sources.zip
+      - name: List extracted files
         shell: bash
-        run: mv boost_${{ inputs.boostVersionUnderscore }} boost-project
-      - name: Bootstrap b2
-        working-directory: boost-project
-        shell: powershell
-        run: .\bootstrap.bat
-
-      - name: Building for x64
-        working-directory: boost-project
-        shell: bash
-        run: ./b2.exe install toolset=msvc architecture=x86 address-model=64 threading=multi link=static variant=release --prefix="$GITHUB_WORKSPACE/boost"
-      - name: Compressing build for x64
-        uses: vimtor/action-zip@v1.3
-        with:
-          files: boost
-          recursive: false
-          dest: boost_windows_x64.zip
-      - name: Uploading build for x64
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload $RELEASE_NAME boost_windows_x64.zip --clobber
-      - name: Clear build folder
-        shell: bash
-        run: rm -rf boost/*
-
-      - name: Building for Win32
-        working-directory: boost-project
-        shell: bash
-        run: ./b2.exe install toolset=msvc architecture=x86 address-model=32 threading=multi link=static variant=release --prefix="$GITHUB_WORKSPACE/boost"
-      - name: Compressing build for Win32
-        uses: vimtor/action-zip@v1.3
-        with:
-          files: boost
-          recursive: false
-          dest: boost_windows_i686.zip
-      - name: Uploading build for Win32
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload $RELEASE_NAME boost_windows_i686.zip --clobber
-      - name: Clear build folder
-        shell: bash
-        run: rm -rf boost/*
-
-      - name: Building for arm64
-        working-directory: boost-project
-        shell: bash
-        run: ./b2.exe install toolset=msvc architecture=arm address-model=64 threading=multi link=static variant=release --prefix="$GITHUB_WORKSPACE/boost"
-      - name: Compressing build for arm64
-        uses: vimtor/action-zip@v1.3
-        with:
-          files: boost
-          recursive: false
-          dest: boost_windows_arm64.zip
-      - name: Uploading build for arm64
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload $RELEASE_NAME boost_windows_arm64.zip --clobber
-      - name: Clear build folder
-        shell: bash
-        run: rm -rf boost/*
+        run: ls -a
 
