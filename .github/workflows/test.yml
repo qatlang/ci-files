@@ -46,12 +46,12 @@ jobs:
       - name: Bootstrap b2
         working-directory: boost-project
         shell: powershell
-        run: bootstrap.bat
+        run: .\bootstrap.bat
 
       - name: Building for x64
         working-directory: boost-project
         shell: bash
-        run: b2.exe install toolset=msvc architecture=x86 address-model=64 threading=multi link=static variant=release --prefix="$GITHUB_WORKSPACE/boost"
+        run: ./b2.exe install toolset=msvc architecture=x86 address-model=64 threading=multi link=static variant=release --prefix="$GITHUB_WORKSPACE/boost"
       - name: Compressing build for x64
         uses: vimtor/action-zip@v1.3
         with:
@@ -70,7 +70,7 @@ jobs:
       - name: Building for Win32
         working-directory: boost-project
         shell: bash
-        run: b2.exe install toolset=msvc architecture=x86 address-model=32 threading=multi link=static variant=release --prefix="$GITHUB_WORKSPACE/boost"
+        run: ./b2.exe install toolset=msvc architecture=x86 address-model=32 threading=multi link=static variant=release --prefix="$GITHUB_WORKSPACE/boost"
       - name: Compressing build for Win32
         uses: vimtor/action-zip@v1.3
         with:
@@ -89,7 +89,7 @@ jobs:
       - name: Building for arm64
         working-directory: boost-project
         shell: bash
-        run: b2.exe install toolset=msvc architecture=arm address-model=64 threading=multi link=static variant=release --prefix="$GITHUB_WORKSPACE/boost"
+        run: ./b2.exe install toolset=msvc architecture=arm address-model=64 threading=multi link=static variant=release --prefix="$GITHUB_WORKSPACE/boost"
       - name: Compressing build for arm64
         uses: vimtor/action-zip@v1.3
         with:
