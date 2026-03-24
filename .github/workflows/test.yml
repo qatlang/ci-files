@@ -30,9 +30,6 @@ jobs:
       - name: Set release name
         shell: bash
         run: echo "RELEASE_NAME=llvm${{ inputs.llvmVersion }}_boost${{ inputs.boostVersion }}_icu${{ inputs.icuVersion }}" >> "$GITHUB_ENV"
-      - name: Install Visual Studio Community
-        run: |
-          choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.Component.MSBuild --add Microsoft.VisualStudio.Component.VC.ATLMFC --add Microsoft.VisualStudio.Component.VC.ATL.ARM64 --add Microsoft.VisualStudio.Component.VC.MFC.ARM64" -y
       - name: Download icu source
         shell: bash
         run: curl -L -o icu_sources.zip https://github.com/unicode-org/icu/releases/download/release-${{ inputs.icuVersion }}/icu4c-${{ inputs.icuVersion }}-sources.zip
@@ -40,6 +37,12 @@ jobs:
         uses: ihiroky/extract-action@v1
         with:
           file_path: icu_sources.zip
+      - name: List folders
+        shell: bash
+        run: ls -R icu
+      - name: Install Visual Studio Community
+        run: |
+          choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.Component.MSBuild --add Microsoft.VisualStudio.Component.VC.ATLMFC --add Microsoft.VisualStudio.Component.VC.ATL.ARM64 --add Microsoft.VisualStudio.Component.VC.MFC.ARM64" -y
       - name: Setup folders
         shell: bash
         run: mkdir icu4c
