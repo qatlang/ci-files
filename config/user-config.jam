@@ -69,13 +69,3 @@ using gcc : armhf : arm-linux-gnueabihf-g++-14 :
 	<strip>"arm-linux-gnueabihf-strip"
 	<ranlib>"arm-linux-gnueabihf-ranlib"
 	<objdump>"arm-linux-gnueabihf-objdump" ;
-
-using gcc : armel : arm-linux-gnueabi-g++-14 :
-	<variant>release <link>static <threading>multi
-	<architecture>arm <address-model>32
-	<cxxflags>"-std=c++20" <cflags>"-std=c11"
-	<archiver>"arm-linux-gnueabi-ar"
-	<nm>"arm-linux-gnueabi-nm"
-	<strip>"arm-linux-gnueabi-strip"
-	<ranlib>"arm-linux-gnueabi-ranlib"
-	<objdump>"arm-linux-gnueabi-objdump" ;
