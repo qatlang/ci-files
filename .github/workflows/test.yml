@@ -48,11 +48,11 @@ jobs:
         run: mkdir icu4c
       - name: Building for x64
         shell: powershell
-        working-directory: icu\icu4c\source\allinone
+        working-directory: icu\source\allinone
         run: |
           msbuild allinone.sln /t:cintltst;common;derb;i18n;makeconv;makedata;pkgdata;icuexportdata;stubdata;toolutil;uconv;io;iotest;icupkg;icuinfo /p:Configuration=Release /p:Platform=x64 /m:4
-          cp -r "$GITHUB_WORKSPACE/icu/icu4c/bin64" "$GITHUB_WORKSPACE/icu4c/bin"
-          cp -r "$GITHUB_WORKSPACE/icu/icu4c/lib64" "$GITHUB_WORKSPACE/icu4c/lib"
+          cp -r "$GITHUB_WORKSPACE/icu/bin64" "$GITHUB_WORKSPACE/icu4c/bin"
+          cp -r "$GITHUB_WORKSPACE/icu/lib64" "$GITHUB_WORKSPACE/icu4c/lib"
       - name: Compressing build for x64
         uses: vimtor/action-zip@v1.3
         with:
@@ -70,11 +70,11 @@ jobs:
 
       - name: Building for Win32
         shell: powershell
-        working-directory: icu\icu4c\source\allinone
+        working-directory: icu\source\allinone
         run: |
           msbuild allinone.sln /t:cintltst;common;derb;i18n;makeconv;makedata;pkgdata;icuexportdata;stubdata;toolutil;uconv;io;iotest;icupkg;icuinfo /p:Configuration=Release /p:Platform=Win32 /m:4
-          cp -r "$GITHUB_WORKSPACE/icu/icu4c/bin" "$GITHUB_WORKSPACE/icu4c/bin"
-          cp -r "$GITHUB_WORKSPACE/icu/icu4c/lib" "$GITHUB_WORKSPACE/icu4c/lib"
+          cp -r "$GITHUB_WORKSPACE/icu/bin" "$GITHUB_WORKSPACE/icu4c/bin"
+          cp -r "$GITHUB_WORKSPACE/icu/lib" "$GITHUB_WORKSPACE/icu4c/lib"
       - name: Compressing build for Win32
         uses: vimtor/action-zip@v1.3
         with:
@@ -92,11 +92,11 @@ jobs:
 
       - name: Building for arm64
         shell: powershell
-        working-directory: icu\icu4c\source\allinone
+        working-directory: icu\source\allinone
         run: |
           msbuild allinone.sln /t:cintltst;common;derb;i18n;makeconv;makedata;pkgdata;icuexportdata;stubdata;toolutil;uconv;io;iotest;icupkg;icuinfo /p:Configuration=Release /p:Platform=ARM64 /m:4
-          cp -r "$GITHUB_WORKSPACE/icu/icu4c/binARM64" "$GITHUB_WORKSPACE/icu4c/bin"
-          cp -r "$GITHUB_WORKSPACE/icu/icu4c/libARM64" "$GITHUB_WORKSPACE/icu4c/lib"
+          cp -r "$GITHUB_WORKSPACE/icu/binARM64" "$GITHUB_WORKSPACE/icu4c/bin"
+          cp -r "$GITHUB_WORKSPACE/icu/libARM64" "$GITHUB_WORKSPACE/icu4c/lib"
       - name: Compressing build for arm64
         uses: vimtor/action-zip@v1.3
         with:
