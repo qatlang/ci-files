@@ -109,7 +109,7 @@ jobs:
       - name: Building for i686
         working-directory: build
         run: |
-          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=i686-unknown-linux-gnu" CXXFLAGS="-std=c++20 --target=i686-unknown-linux-gnu" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=i686-unknown-linux-gnu" CXXFLAGS="-std=c++20 --target=i686-unknown-linux-gnu" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive" --host="i686-unknown-linux-gnu"
           make install -j8
       - name: Compress build for i686
         run: tar -czf libarchive_linux_i686.tar.gz libarchive
@@ -124,7 +124,7 @@ jobs:
       - name: Building for arm64
         working-directory: build
         run: |
-          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=aarch64-unknown-linux-gnu" CXXFLAGS="-std=c++20 --target=aarch64-unknown-linux-gnu" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=aarch64-unknown-linux-gnu" CXXFLAGS="-std=c++20 --target=aarch64-unknown-linux-gnu" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive" --host="aarch64-unknown-linux-gnu"
           make install -j8
       - name: Compress build for arm64
         run: tar -czf libarchive_linux_arm64.tar.gz libarchive
@@ -139,7 +139,7 @@ jobs:
       - name: Building for riscv64
         working-directory: build
         run: |
-          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=riscv64-unknown-linux-gnu" CXXFLAGS="-std=c++20 --target=riscv64-unknown-linux-gnu" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=riscv64-unknown-linux-gnu" CXXFLAGS="-std=c++20 --target=riscv64-unknown-linux-gnu" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive" --host="riscv64-unknown-linux-gnu"
           make install -j8
       - name: Compress build for riscv64
         run: tar -czf libarchive_linux_riscv64.tar.gz libarchive
@@ -154,7 +154,7 @@ jobs:
       - name: Building for powerpc64le
         working-directory: build
         run: |
-          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=powerpc64le-unknown-linux-gnu" CXXFLAGS="-std=c++20 --target=powerpc64le-unknown-linux-gnu" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=powerpc64le-unknown-linux-gnu" CXXFLAGS="-std=c++20 --target=powerpc64le-unknown-linux-gnu" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive" --host="powerpc64le-unknown-linux-gnu"
           make install -j8
       - name: Compress build for powerpc64le
         run: tar -czf libarchive_linux_powerpc64le.tar.gz libarchive
@@ -169,7 +169,7 @@ jobs:
       - name: Building for s390x
         working-directory: build
         run: |
-          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=s390x-unknown-linux-gnu" CXXFLAGS="-std=c++20 --target=s390x-unknown-linux-gnu" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=s390x-unknown-linux-gnu" CXXFLAGS="-std=c++20 --target=s390x-unknown-linux-gnu" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive" --host="s390x-unknown-linux-gnu"
           make install -j8
       - name: Compress build for s390x
         run: tar -czf libarchive_linux_s390x.tar.gz libarchive
@@ -184,7 +184,7 @@ jobs:
       - name: Building for armhf
         working-directory: build
         run: |
-          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=arm-unknown-linux-gnueabihf" CXXFLAGS="-std=c++20 --target=arm-unknown-linux-gnueabihf" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=arm-unknown-linux-gnueabihf" CXXFLAGS="-std=c++20 --target=arm-unknown-linux-gnueabihf" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive" --host="arm-unknown-linux-gnueabihf"
           make install -j8
       - name: Compress build for armhf
         run: tar -czf libarchive_linux_armhf.tar.gz libarchive
