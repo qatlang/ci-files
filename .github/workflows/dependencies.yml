@@ -896,6 +896,53 @@ jobs:
           gh release upload "$RELEASE_NAME" runtimes_linux_armhf.tar.gz --clobber
           rm runtimes_linux_armhf.tar.gz
 
+  libarchive_macos:
+    name: libarchive for macOS (arm64, x64)
+    runs-on: macos-latest
+    needs: [create_release]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Create directories
+        run: mkdir libarchive build
+      - name: Download libarchive source
+        run: |
+          wget https://github.com/libarchive/libarchive/releases/download/v${{ inputs.libarchiveVersion }}/libarchive-${{ inputs.libarchiveVersion }}.tar.gz
+          tar -xzf libarchive-${{ inputs.libarchiveVersion }}.tar.gz
+          mv libarchive-${{ inputs.libarchiveVersion }} libarchive-project
+
+      - name: Build for arm64
+        working-directory: build
+        run: |
+          ../libarchive-project/configure CFLAGS="-std=c11 -mmacosx-version-min=13.0" CXXFLAGS="-std=c++20 -mmacosx-version-min=13.0" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          make install -j8
+      - name: Compress build for arm64
+        run: tar -czf libarchive_macos_arm64.tar.gz libarchive
+      - name: Upload build for arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" libarchive_macos_arm64.tar.gz --clobber
+      - name: Clean build directory
+        run: |
+          rm -rf $GITHUB_WORKSPACE/build/*
+          rm -rf libarchive-project/*
+
+      - name: Build for x64
+        working-directory: build
+        run: |
+          ../libarchive-project/configure CFLAGS="-std=c11 --target=x86_64-apple-darwin -mmacosx-version-min=13.0" CXXFLAGS="-std=c++20 --target=x86_64-apple-darwin -mmacosx-version-min=13.0" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          make install -j8
+      - name: Compress build for x64
+        run: tar -czf libarchive_macos_x64.tar.gz libarchive
+      - name: Upload build for x64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" libarchive_macos_x64.tar.gz --clobber
+      - name: Clean build directory
+        run: |
+          rm -rf $GITHUB_WORKSPACE/build/*
+          rm -rf libarchive-project/*
+
   macos_icu4c:
     name: icu4c for macOS (arm64, x64)
     runs-on: macos-latest
