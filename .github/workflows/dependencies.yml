@@ -19,6 +19,10 @@ on:
         required: true
         default: "78.3"
         type: string
+      libarchiveVersion:
+        required: true
+        default: "3.8.7"
+        type: string
 
 env:
   EMSCRIPTEN_VERSION: "5.0.7"
