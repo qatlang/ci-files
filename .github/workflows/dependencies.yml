@@ -1268,12 +1268,82 @@ jobs:
         shell: bash
         run: rm -rf boost/*
 
+  libarchive_windows:
+    name: libarchive for Windows (x64, i686, arm64)
     needs: [create_release]
     runs-on: windows-2022
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Install Visual Studio Community
+        run: choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.Component.MSBuild --add Microsoft.VisualStudio.Component.VC.ATLMFC --add Microsoft.VisualStudio.Component.VC.ATL.ARM64 --add Microsoft.VisualStudio.Component.VC.MFC.ARM64" -y
+      - name: Create directories
         shell: bash
+        run: mkdir libarchive libarchive_install
+
+      - name: Install libarchive for x64
+        shell: bash
+        run: |
+          vcpkg install libarchive[core] --triplet=x64-windows-static --x-install-root="$GITHUB_WORKSPACE\libarchive_install"
+          cp -r "$GITHUB_WORKSPACE/libarchive_install/x64-windows-static/lib" "$GITHUB_WORKSPACE/libarchive/lib"
+          cp -r "$GITHUB_WORKSPACE/libarchive_install/x64-windows-static/include" "$GITHUB_WORKSPACE/libarchive/include"
+      - name: Compressing build for x64
+        uses: vimtor/action-zip@v1.3
+        with:
+          files: libarchive
+          recursive: false
+          dest: libarchive_windows_x64.zip
+      - name: Clear directories
+        shell: bash
+        run: |
+          rm -rf libarchive/*
+          rm -rf libarchive_install/*
+
+      - name: Install libarchive for i686
+        shell: bash
+        run: |
+          vcpkg install libarchive[core] --triplet=x86-windows-static --x-install-root="$GITHUB_WORKSPACE\libarchive_install"
+          cp -r "$GITHUB_WORKSPACE/libarchive_install/x86-windows-static/lib" "$GITHUB_WORKSPACE/libarchive/lib"
+          cp -r "$GITHUB_WORKSPACE/libarchive_install/x86-windows-static/include" "$GITHUB_WORKSPACE/libarchive/include"
+      - name: Compressing build for i686
+        uses: vimtor/action-zip@v1.3
+        with:
+          files: libarchive
+          recursive: false
+          dest: libarchive_windows_i686.zip
+      - name: Clear directories
+        shell: bash
+        run: |
+          rm -rf libarchive/*
+          rm -rf libarchive_install/*
+
+      - name: Install libarchive for arm64
+        shell: bash
+        run: |
+          vcpkg install libarchive[core] --triplet=arm64-windows-static --x-install-root="$GITHUB_WORKSPACE\libarchive_install"
+          cp -r "$GITHUB_WORKSPACE/libarchive_install/arm64-windows-static/lib" "$GITHUB_WORKSPACE/libarchive/lib"
+          cp -r "$GITHUB_WORKSPACE/libarchive_install/arm64-windows-static/include" "$GITHUB_WORKSPACE/libarchive/include"
+      - name: Compressing build for arm64
+        uses: vimtor/action-zip@v1.3
+        with:
+          files: libarchive
+          recursive: false
+          dest: libarchive_windows_arm64.zip
+      - name: Clear directories
+        shell: bash
+        run: |
+          rm -rf libarchive/*
+          rm -rf libarchive_install/*
+
+      - name: Uploading builds
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload $RELEASE_NAME libarchive_windows_x64.zip --clobber
+          gh release upload $RELEASE_NAME libarchive_windows_i686.zip --clobber
+          gh release upload $RELEASE_NAME libarchive_windows_arm64.zip --clobber
+
   icu_windows:
     name: icu for Windows (x64, i686, arm64)
     needs: [create_release]
