@@ -81,8 +81,7 @@ jobs:
         run: gh release upload "$RELEASE_NAME" libarchive_linux_x64.tar.gz --clobber
       - name: Clean build directory
         run: |
-          rm -rf $GITHUB_WORKSPACE/build/*
-          rm -rf libarchive-project/*
+          rm -rf build/* libarchive/*
 
       - name: Clone emsdk
         run: git clone --depth 1 --branch $EMSCRIPTEN_VERSION https://github.com/emscripten-core/emsdk.git
@@ -105,8 +104,7 @@ jobs:
         run: gh release upload "$RELEASE_NAME" libarchive_emscripten_wasm32.tar.gz --clobber
       - name: Clean build directory
         run: |
-          rm -rf $GITHUB_WORKSPACE/build/*
-          rm -rf libarchive-project/*
+          rm -rf build/* libarchive/*
 
       - name: Building for i686
         working-directory: build
@@ -121,8 +119,7 @@ jobs:
         run: gh release upload "$RELEASE_NAME" libarchive_linux_i686.tar.gz --clobber
       - name: Clean build directory
         run: |
-          rm -rf $GITHUB_WORKSPACE/build/*
-          rm -rf libarchive-project/*
+          rm -rf build/* libarchive/*
 
       - name: Building for arm64
         working-directory: build
@@ -137,8 +134,7 @@ jobs:
         run: gh release upload "$RELEASE_NAME" libarchive_linux_arm64.tar.gz --clobber
       - name: Clean build directory
         run: |
-          rm -rf $GITHUB_WORKSPACE/build/*
-          rm -rf libarchive-project/*
+          rm -rf build/* libarchive/*
 
       - name: Building for riscv64
         working-directory: build
@@ -153,8 +149,7 @@ jobs:
         run: gh release upload "$RELEASE_NAME" libarchive_linux_riscv64.tar.gz --clobber
       - name: Clean build directory
         run: |
-          rm -rf $GITHUB_WORKSPACE/build/*
-          rm -rf libarchive-project/*
+          rm -rf build/* libarchive/*
 
       - name: Building for powerpc64le
         working-directory: build
@@ -169,8 +164,7 @@ jobs:
         run: gh release upload "$RELEASE_NAME" libarchive_linux_powerpc64le.tar.gz --clobber
       - name: Clean build directory
         run: |
-          rm -rf $GITHUB_WORKSPACE/build/*
-          rm -rf libarchive-project/*
+          rm -rf build/* libarchive/*
 
       - name: Building for s390x
         working-directory: build
@@ -185,8 +179,7 @@ jobs:
         run: gh release upload "$RELEASE_NAME" libarchive_linux_s390x.tar.gz --clobber
       - name: Clean build directory
         run: |
-          rm -rf $GITHUB_WORKSPACE/build/*
-          rm -rf libarchive-project/*
+          rm -rf build/* libarchive/*
 
       - name: Building for armhf
         working-directory: build
@@ -199,10 +192,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload "$RELEASE_NAME" libarchive_linux_armhf.tar.gz --clobber
-      - name: Clean build directory
-        run: |
-          rm -rf $GITHUB_WORKSPACE/build/*
-          rm -rf libarchive-project/*
 
   icu4c_linux:
     name: icu4c for Linux & Emscripten
