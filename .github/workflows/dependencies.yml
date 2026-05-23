@@ -925,7 +925,7 @@ jobs:
       - name: Clean build directory
         run: |
           rm -rf $GITHUB_WORKSPACE/build/*
-          rm -rf libarchive-project/*
+          rm -rf $GITHUB_WORKSPACE/libarchive/*
 
       - name: Build for x64
         working-directory: build
@@ -938,10 +938,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload "$RELEASE_NAME" libarchive_macos_x64.tar.gz --clobber
-      - name: Clean build directory
-        run: |
-          rm -rf $GITHUB_WORKSPACE/build/*
-          rm -rf libarchive-project/*
 
   macos_icu4c:
     name: icu4c for macOS (arm64, x64)
