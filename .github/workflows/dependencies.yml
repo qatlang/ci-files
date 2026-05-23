@@ -94,7 +94,7 @@ jobs:
         working-directory: build
         run: |
           source ../emsdk/emsdk_env.sh
-          emconfigure ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11" CXXFLAGS="-std=c++20" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          emconfigure ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11" CXXFLAGS="-std=c++20" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive" --host="wasm32-unknown-emscripten"
           emmake make install -j8
       - name: Compress build for Emscripten (wasm32)
         run: tar -czf libarchive_emscripten_wasm32.tar.gz libarchive
