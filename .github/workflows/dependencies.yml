@@ -39,6 +39,171 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create $RELEASE_NAME --title "llvm ${{ inputs.llvmVersion }}, boost ${{ inputs.boostVersion }}, icu4c ${{ inputs.icuVersion }}, libarchive ${{ inputs.libarchiveVersion }}" --notes "Release notes are updated manually, so it is work in progress"
 
+  libarchive_linux:
+    name: libarchive for Linux & Emscripten
+    needs: [create_release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: action/checkout@v4
+      - name: Install build tools for x64
+        run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
+      - name: Install build tools for i686
+        run: sudo apt install --yes binutils-i686-linux-gnu cpp-14-i686-linux-gnu g++-14-i686-linux-gnu gcc-14-i686-linux-gnu libc6-dev-i386-cross libc6-i386-cross libgcc-14-dev-i386-cross libstdc++6-i386-cross libx32stdc++-14-dev-i386-cross libstdc++-14-dev-i386-cross libstdc++-14-pic-i386-cross linux-libc-dev-i386-cross
+      - name: Install build tools for arm64
+        run: sudo apt install --yes binutils-aarch64-linux-gnu cpp-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu gcc-14-aarch64-linux-gnu libc6-dev-arm64-cross libc6-arm64-cross libgcc-14-dev-arm64-cross libstdc++6-arm64-cross libstdc++-14-dev-arm64-cross linux-libc-dev-arm64-cross
+      - name: Install build tools for riscv64
+        run: sudo apt install --yes binutils-riscv64-linux-gnu cpp-14-riscv64-linux-gnu g++-14-riscv64-linux-gnu gcc-14-riscv64-linux-gnu gcc-riscv64-unknown-elf libc6-dev-riscv64-cross libc6-riscv64-cross libgcc-14-dev-riscv64-cross libstdc++6-riscv64-cross libstdc++-14-dev-riscv64-cross libstdc++-14-pic-riscv64-cross linux-libc-dev-riscv64-cross
+      - name: Install build tools for powerpc64le
+        run: sudo apt install --yes binutils-powerpc64le-linux-gnu cpp-14-powerpc64le-linux-gnu g++-14-powerpc64le-linux-gnu gcc-14-powerpc64le-linux-gnu libc6-dev-ppc64el-cross libc6-ppc64el-cross libgcc-14-dev-ppc64el-cross libstdc++6-ppc64el-cross libstdc++-14-dev-ppc64el-cross libstdc++-14-pic-ppc64el-cross linux-libc-dev-ppc64el-cross
+      - name: Install build tools for s390x
+        run: sudo apt install --yes binutils-s390x-linux-gnu cpp-14-s390x-linux-gnu g++-14-s390x-linux-gnu gcc-14-s390x-linux-gnu libc6-dev-s390x-cross libc6-s390x-cross libgcc-14-dev-s390x-cross libstdc++6-s390x-cross libstdc++-14-dev-s390x-cross libstdc++-14-pic-s390x-cross linux-libc-dev-s390x-cross
+      - name: Install build tools for armhf
+        run: sudo apt install --yes binutils-arm-linux-gnueabihf cpp-14-arm-linux-gnueabihf g++-14-arm-linux-gnueabihf gcc-14-arm-linux-gnueabihf libc6-dev-armhf-cross libc6-armhf-cross libgcc-14-dev-armhf-cross libstdc++6-armhf-cross libstdc++-14-dev-armhf-cross libstdc++-14-pic-armhf-cross linux-libc-dev-armhf-cross
+      - name: Download libarchive source
+        run: |
+          wget https://github.com/libarchive/libarchive/releases/download/v${{ inputs.libarchiveVersion }}/libarchive-${{ inputs.libarchiveVersion }}.tar.gz
+          tar -xzf libarchive-${{ inputs.libarchiveVersion }}.tar.gz
+          mv libarchive-${{ inputs.libarchiveVersion }} libarchive-project
+          mkdir libarchive
+          mkdir build
+
+      - name: Building for x64
+        working-directory: build
+        run: |
+          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11" CXXFLAGS="-std=c++20" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          make install -j8
+      - name: Compress build for x64
+        run: tar -czf libarchive_linux_x64.tar.gz libarchive
+      - name: Upload build for x64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" libarchive_linux_x64.tar.gz --clobber
+      - name: Clean build directory
+        run: |
+          rm -rf $GITHUB_WORKSPACE/build/*
+          rm -rf libarchive-project/*
+
+      - name: Clone emsdk
+        run: git clone --depth 1 --branch $EMSCRIPTEN_VERSION https://github.com/emscripten-core/emsdk.git
+      - name: Install Emscripten SDK
+        working-directory: emsdk
+        run: |
+          ./emsdk install latest
+          ./emsdk activate latest
+      - name: Building for Emscripten (wasm32)
+        working-directory: build
+        run: |
+          source ../emsdk/emsdk_env.sh
+          emconfigure ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11" CXXFLAGS="-std=c++20" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          emmake make install -j8
+      - name: Compress build for Emscripten (wasm32)
+        run: tar -czf libarchive_emscripten_wasm32.tar.gz libarchive
+      - name: Upload build for Emscripten (wasm32)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" libarchive_emscripten_wasm32.tar.gz --clobber
+      - name: Clean build directory
+        run: |
+          rm -rf $GITHUB_WORKSPACE/build/*
+          rm -rf libarchive-project/*
+
+      - name: Building for i686
+        working-directory: build
+        run: |
+          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=i686-unknown-linux-gnu" CXXFLAGS="-std=c++20 --target=i686-unknown-linux-gnu" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          make install -j8
+      - name: Compress build for i686
+        run: tar -czf libarchive_linux_i686.tar.gz libarchive
+      - name: Upload build for i686
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" libarchive_linux_i686.tar.gz --clobber
+      - name: Clean build directory
+        run: |
+          rm -rf $GITHUB_WORKSPACE/build/*
+          rm -rf libarchive-project/*
+
+      - name: Building for arm64
+        working-directory: build
+        run: |
+          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=aarch64-unknown-linux-gnu" CXXFLAGS="-std=c++20 --target=aarch64-unknown-linux-gnu" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          make install -j8
+      - name: Compress build for arm64
+        run: tar -czf libarchive_linux_arm64.tar.gz libarchive
+      - name: Upload build for arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" libarchive_linux_arm64.tar.gz --clobber
+      - name: Clean build directory
+        run: |
+          rm -rf $GITHUB_WORKSPACE/build/*
+          rm -rf libarchive-project/*
+
+      - name: Building for riscv64
+        working-directory: build
+        run: |
+          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=riscv64-unknown-linux-gnu" CXXFLAGS="-std=c++20 --target=riscv64-unknown-linux-gnu" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          make install -j8
+      - name: Compress build for riscv64
+        run: tar -czf libarchive_linux_riscv64.tar.gz libarchive
+      - name: Upload build for riscv64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" libarchive_linux_riscv64.tar.gz --clobber
+      - name: Clean build directory
+        run: |
+          rm -rf $GITHUB_WORKSPACE/build/*
+          rm -rf libarchive-project/*
+
+      - name: Building for powerpc64le
+        working-directory: build
+        run: |
+          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=powerpc64le-unknown-linux-gnu" CXXFLAGS="-std=c++20 --target=powerpc64le-unknown-linux-gnu" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          make install -j8
+      - name: Compress build for powerpc64le
+        run: tar -czf libarchive_linux_powerpc64le.tar.gz libarchive
+      - name: Upload build for powerpc64le
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" libarchive_linux_powerpc64le.tar.gz --clobber
+      - name: Clean build directory
+        run: |
+          rm -rf $GITHUB_WORKSPACE/build/*
+          rm -rf libarchive-project/*
+
+      - name: Building for s390x
+        working-directory: build
+        run: |
+          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=s390x-unknown-linux-gnu" CXXFLAGS="-std=c++20 --target=s390x-unknown-linux-gnu" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          make install -j8
+      - name: Compress build for s390x
+        run: tar -czf libarchive_linux_s390x.tar.gz libarchive
+      - name: Upload build for s390x
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" libarchive_linux_s390x.tar.gz --clobber
+      - name: Clean build directory
+        run: |
+          rm -rf $GITHUB_WORKSPACE/build/*
+          rm -rf libarchive-project/*
+
+      - name: Building for armhf
+        working-directory: build
+        run: |
+          ../libarchive-project/configure CC=clang-20 CXX=clang++-20 CFLAGS="-std=c11 --target=arm-unknown-linux-gnueabihf" CXXFLAGS="-std=c++20 --target=arm-unknown-linux-gnueabihf" --enable-static --disable-shared --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-bsdunzip --without-bz2lib --without-libb2 --without-iconv --without-libiconv-prefix --without-lz4 --without-zstd --without-lzma --without-cng --without-openssl --without-xml2 --without-expat --enable-year2038 --prefix="$GITHUB_WORKSPACE/libarchive"
+          make install -j8
+      - name: Compress build for armhf
+        run: tar -czf libarchive_linux_armhf.tar.gz libarchive
+      - name: Upload build for armhf
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$RELEASE_NAME" libarchive_linux_armhf.tar.gz --clobber
+      - name: Clean build directory
+        run: |
+          rm -rf $GITHUB_WORKSPACE/build/*
+          rm -rf libarchive-project/*
+
   icu4c_linux:
     name: icu4c for Linux & Emscripten
     needs: [create_release]
