@@ -35,7 +35,7 @@ jobs:
     name: Create release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Create release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install build tools for x64
         run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
       - name: Install build tools for i686
@@ -201,7 +201,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install build tools for x64
         run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
       - name: Install build tools for i686
@@ -363,7 +363,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install build tools for x64
         run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
       - name: Install build tools for i686
@@ -517,7 +517,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install build tools for x64
         run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
       - name: Download LLVM source
@@ -599,7 +599,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install build tools for x64
         run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
       - name: Install build tools for i686
@@ -648,7 +648,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install build tools for x64
         run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
       - name: Install build tools for arm64
@@ -697,7 +697,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install build tools for x64
         run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
       - name: Install build tools for riscv64
@@ -746,7 +746,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install build tools for x64
         run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
       - name: Install build tools for powerpc64le
@@ -795,7 +795,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install build tools for x64
         run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
       - name: Install build tools for s390x
@@ -844,7 +844,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install build tools for x64
         run: sudo apt install --yes ninja-build clang-20 llvm-20 lld-20 binutils libstdc++6 libstdc++-14-pic
       - name: Install build tools for armhf
@@ -893,7 +893,7 @@ jobs:
     needs: [create_release]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Create directories
         run: mkdir libarchive build
       - name: Download libarchive source
@@ -936,7 +936,7 @@ jobs:
     needs: [create_release]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Create directories
         run: |
           mkdir icu4c
@@ -981,7 +981,7 @@ jobs:
     needs: [create_release]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Download boost source
         run: |
           wget https://github.com/boostorg/boost/releases/download/boost-${{ inputs.boostVersion }}/boost-${{ inputs.boostVersion }}-b2-nodocs.tar.gz
@@ -1023,7 +1023,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Download LLVM source
         run: |
           wget https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.llvmVersion }}/llvm-project-${{ inputs.llvmVersion }}.src.tar.xz
@@ -1067,7 +1067,7 @@ jobs:
     runs-on: windows-2022
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install Visual Studio Community
         run: |
           choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.Component.MSBuild --add Microsoft.VisualStudio.Component.VC.ATLMFC --add Microsoft.VisualStudio.Component.VC.ATL.ARM64 --add Microsoft.VisualStudio.Component.VC.MFC.ARM64" -y
@@ -1101,7 +1101,7 @@ jobs:
     runs-on: windows-2022
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install Visual Studio Community
         run: |
           choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.Component.MSBuild --add Microsoft.VisualStudio.Component.VC.ATLMFC" -y
@@ -1135,7 +1135,7 @@ jobs:
     runs-on: windows-2022
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install Visual Studio Community
         run: |
           choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.Component.MSBuild --add Microsoft.VisualStudio.Component.VC.ATLMFC --add Microsoft.VisualStudio.Component.VC.ATL.ARM64 --add Microsoft.VisualStudio.Component.VC.MFC.ARM64" -y
@@ -1179,7 +1179,7 @@ jobs:
     runs-on: windows-2022
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install Visual Studio Community
         run: |
           choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.Component.MSBuild --add Microsoft.VisualStudio.Component.VC.ATLMFC --add Microsoft.VisualStudio.Component.VC.ATL.ARM64 --add Microsoft.VisualStudio.Component.VC.MFC.ARM64" -y
@@ -1261,7 +1261,7 @@ jobs:
     runs-on: windows-2022
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install Visual Studio Community
         run: choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.Component.MSBuild --add Microsoft.VisualStudio.Component.VC.ATLMFC --add Microsoft.VisualStudio.Component.VC.ATL.ARM64 --add Microsoft.VisualStudio.Component.VC.MFC.ARM64" -y
       - name: Create directories
@@ -1337,7 +1337,7 @@ jobs:
     runs-on: windows-2022
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install Visual Studio Community
         run: choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.Component.MSBuild --add Microsoft.VisualStudio.Component.VC.ATLMFC --add Microsoft.VisualStudio.Component.VC.ATL.ARM64 --add Microsoft.VisualStudio.Component.VC.MFC.ARM64" -y
       - name: Download icu source
